@@ -26,6 +26,7 @@ appsettings.Local.json
 
 # Logs and generated QA artifacts
 *.log
+artifacts/
 .chrome-ui-review/
 .qa-output/
 .qa-output-auth/
