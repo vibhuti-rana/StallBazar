@@ -1,0 +1,196 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<section class="swap-hero clean-hero" data-carousel>
+    <div class="hero-slide active" style="background-image:url('https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="hero-slide" style="background-image:url('https://images.unsplash.com/photo-1528605105345-5344ea20e269?auto=format&fit=crop&w=1800&q=80')"></div>
+    <div class="swap-hero-inner">
+        <div class="hero-kicker">Stall booking platform</div>
+        <h1 class="serif">Book event stalls without messy calls, spreadsheets, or confusion</h1>
+        <p>StallBazar helps organizers publish events with stall maps and helps vendors request the right space, submit payment references, and follow approval updates from one account.</p>
+        <div class="swap-actions">
+            <a class="bp" asp-controller="Events" asp-action="Index">Browse events</a>
+            <a class="bo" asp-controller="Account" asp-action="Register">Start as vendor</a>
+        </div>
+    </div>
+    <div class="motion-strip" aria-hidden="true">
+        <span>Event discovery</span><span>Stall layouts</span><span>Vendor requests</span><span>Deposit review</span><span>Approvals</span>
+    </div>
+    <div class="hero-device" aria-label="StallBazar product preview">
+        <div class="device-bar">
+            <span></span><span></span><span></span>
+        </div>
+        <div class="device-shell">
+            <div class="device-panel main">
+                <div class="map-head">
+                    <strong>Food Street Festival</strong>
+                    <span>Live layout</span>
+                </div>
+                <div class="mini-map">
+                    <b>A01</b><b>A02</b><b class="hot">A03</b><b>A04</b>
+                    <b>B01</b><b class="held">B02</b><b>B03</b><b>B04</b>
+                    <b>C01</b><b>C02</b><b class="booked">C03</b><b>C04</b>
+                </div>
+            </div>
+            <div class="device-panel floating">
+                <span>Booking request</span>
+                <strong>Premium stall A03</strong>
+                <small>50% deposit ready for review</small>
+            </div>
+            <div class="device-panel chat">
+                <span>Vendor note</span>
+                <p>Need a front entrance space for live food prep.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="brand-strip">
+    <div>
+        <span>Built for events across Nepal</span>
+        <strong>Food festivals</strong>
+        <strong>Campus fairs</strong>
+        <strong>Trade expos</strong>
+        <strong>Art markets</strong>
+        <strong>Community bazaars</strong>
+    </div>
+</section>
+
+<section class="homepage-overview">
+    <div class="overview-copy">
+        <span class="sec-lbl">What it solves</span>
+        <h2 class="serif">A complete booking workspace for both sides of the event</h2>
+        <p>Most small and mid-sized events still manage stalls through phone calls, scattered forms, screenshots, and manual payment checks. StallBazar brings those steps into one role-based system that is easy to explain, easy to demo, and useful for real organizers.</p>
+    </div>
+    <div class="overview-grid">
+        <article><strong>01</strong><h3>Publish events</h3><p>Organizers add venue, category, event dates, event photos, map images, stall prices, and stall availability.</p></article>
+        <article><strong>02</strong><h3>Request stalls</h3><p>Vendors compare options, choose a stall, add a note, and send a booking request through their account.</p></article>
+        <article><strong>03</strong><h3>Review payments</h3><p>Payment references and approval status stay attached to the booking, so organizers can verify before confirming.</p></article>
+        <article><strong>04</strong><h3>Track updates</h3><p>Dashboards and notifications show what is pending, approved, rejected, booked, or still available.</p></article>
+    </div>
+</section>
+
+<section class="swap-section thinking">
+    <div class="section-intro">
+        <span>The StallBazar advantage</span>
+        <h2 class="serif">A booking flow that handles the actual handoffs</h2>
+    </div>
+    <div class="benefit-loop">
+        <article><h3>Discover the right event</h3><p>Vendors browse active events, categories, locations, dates, and stall availability before sending a request.</p></article>
+        <article><h3>Pick from a visual map</h3><p>Layouts make availability clear, so vendors understand position, size, zone, and price before booking.</p></article>
+        <article><h3>Approve without conflict</h3><p>Organizers review requests, confirm deposits, and avoid accidental double bookings from one dashboard.</p></article>
+        <article><h3>Track the full journey</h3><p>Notifications and role dashboards keep everyone aligned from request to approval to event day.</p></article>
+    </div>
+</section>
+
+<section class="kpi-band">
+    <div class="kpi-copy">
+        <span>Trust by design</span>
+        <h2 class="serif">Clear rules instead of unsupported marketplace claims</h2>
+    </div>
+    <div class="kpi-grid">
+        <article><strong>01</strong><span>Organizer-owned event records</span></article>
+        <article><strong>02</strong><span>Terms visible before applying</span></article>
+        <article><strong>03</strong><span>Deposit status attached to booking</span></article>
+        <article><strong>04</strong><span>Protected stall allocation</span></article>
+    </div>
+</section>
+
+<section class="quote-rail">
+    <article><div class="quote-logo">Transparent listing</div><h3>Dates, audience, facilities, vendor rules, prices, and cancellation terms belong in one place.</h3><p>Vendors should not need private messages to understand the basic commercial terms of an event.</p></article>
+    <article><div class="quote-logo">Accountable organizer</div><h3>Every event is tied to the organizer who owns and manages its stalls.</h3><p>Public contact details and organizer profile information give vendors a clear channel for questions.</p></article>
+    <article><div class="quote-logo">Auditable booking</div><h3>Requests, deposit references, decisions, and notifications stay connected.</h3><p>Both sides can see the current state instead of relying on scattered calls and screenshots.</p></article>
+</section>
+
+<section class="role-showcase">
+    <div class="section-intro wide">
+        <span>Role-based dashboards</span>
+        <h2 class="serif">Different users see the tools they actually need</h2>
+    </div>
+    <div class="role-showcase-grid">
+        <article>
+            <div class="role-tag">Vendors</div>
+            <h3>Find and request a stall</h3>
+            <p>Browse public events, review maps, check pricing, submit stall requests, add deposit references, and see booking status from the vendor dashboard.</p>
+            <ul><li>Search events by category and venue</li><li>Compare stall size, tier, zone, and price</li><li>Track pending and approved bookings</li></ul>
+        </article>
+        <article>
+            <div class="role-tag">Organizers</div>
+            <h3>Publish and approve with control</h3>
+            <p>Create event pages, upload venue visuals, configure stall layouts, review vendor notes, verify payments, and prevent double booking.</p>
+            <ul><li>Create events and stall inventory</li><li>Approve or reject requests</li><li>Keep vendors updated through notifications</li></ul>
+        </article>
+        <article>
+            <div class="role-tag">Admin</div>
+            <h3>Monitor platform activity</h3>
+            <p>Admins can review platform totals, events, bookings, and user activity so the whole system remains easier to supervise.</p>
+            <ul><li>View dashboard metrics</li><li>Monitor event and booking activity</li><li>Support users across roles</li></ul>
+        </article>
+    </div>
+</section>
+
+<section class="swap-section platform">
+    <div class="section-intro wide">
+        <span>Event commerce platform</span>
+        <h2 class="serif">A living stall marketplace, not a static listing page</h2>
+    </div>
+    <div class="platform-grid">
+        <article class="platform-card"><div><span>01</span><h3>Discovery becomes guided browsing</h3><p>Events are presented by category, venue, date, and availability so vendors can quickly find the best match.</p><a asp-controller="Events" asp-action="Index">Explore events</a></div><div class="visual-card visual-one"></div></article>
+        <article class="platform-card"><div><span>02</span><h3>Stall choice becomes visual</h3><p>Interactive maps turn abstract stall numbers into clear zones, dimensions, tiers, and booking states.</p><a asp-controller="Events" asp-action="Index">View layouts</a></div><div class="visual-card visual-two"></div></article>
+        <article class="platform-card"><div><span>03</span><h3>Approvals happen in the flow</h3><p>Organizers can move from review to confirmation while vendors stay informed through their dashboard.</p><a asp-controller="Account" asp-action="Login">Sign in</a></div><div class="visual-card visual-three"></div></article>
+        <article class="platform-card"><div><span>04</span><h3>Event day stays organized</h3><p>Final stall assignments, request status, and vendor records remain easy to scan when the venue gets busy.</p><a asp-controller="Account" asp-action="Register">Start booking</a></div><div class="visual-card visual-four"></div></article>
+    </div>
+</section>
+
+<section class="story-grid">
+    <article class="story-card large"><div class="story-image story-one"></div><div><span>Food festival</span><h3 class="serif">Premium entrance stalls booked without back-and-forth calls</h3><p>Organizers can publish the map once and let vendors request available spaces directly.</p></div></article>
+    <article class="story-card"><div class="story-image story-two"></div><div><span>Trade expo</span><h3 class="serif">Clear zones for sponsors, exhibitors, and service areas</h3></div></article>
+    <article class="story-card"><div class="story-image story-three"></div><div><span>Community bazaar</span><h3 class="serif">Local vendors get a simpler way to join events</h3></div></article>
+</section>
+
+<section class="process-band">
+    <div><span class="sec-lbl">How it works</span><h2 class="serif">From event setup to booking approval</h2></div>
+    <ol>
+        <li><strong>Create event</strong><span>Add venue, date, category, description, and public event visuals.</span></li>
+        <li><strong>Add stalls</strong><span>Set stall number, size, price, zone, tier, status, and map position.</span></li>
+        <li><strong>Receive requests</strong><span>Vendors choose a stall and submit a booking request with their note.</span></li>
+        <li><strong>Verify deposit</strong><span>Organizer checks the payment reference and marks the payment status.</span></li>
+        <li><strong>Confirm booking</strong><span>Approved stalls become booked and competing pending requests are handled.</span></li>
+    </ol>
+</section>
+
+<section class="article-section">
+    <div class="article-head">
+        <h2 class="serif">Read more about better event operations</h2>
+        <a asp-controller="Home" asp-action="About">More about StallBazar</a>
+    </div>
+    <div class="article-grid">
+        <article><div class="article-img a-one"></div><span>Booking</span><h3>How visual stall maps reduce confusion before event day</h3><a asp-controller="Events" asp-action="Index">Read more</a></article>
+        <article><div class="article-img a-two"></div><span>Vendors</span><h3>What vendors need before they choose a market stall</h3><a asp-controller="Events" asp-action="Index">Read more</a></article>
+        <article><div class="article-img a-three"></div><span>Organizers</span><h3>Moving event approvals out of spreadsheets</h3><a asp-controller="Events" asp-action="Index">Read more</a></article>
+    </div>
+</section>
+
+<section class="faq-section">
+    <div class="section-intro wide">
+        <span>Common questions</span>
+        <h2 class="serif">Details that make the platform feel ready to use</h2>
+    </div>
+    <div class="faq-grid">
+        <article><h3>Can vendors see stall availability?</h3><p>Yes. Each stall has a live status such as available, pending, booked, or unavailable, and the event detail page shows the stall map and stall cards.</p></article>
+        <article><h3>Can organizers upload real event images?</h3><p>Yes. Event creation supports event photos and map images so the listing can match the real venue instead of looking generic.</p></article>
+        <article><h3>How are payments handled?</h3><p>The platform records payment references and payment status. It does not process money directly, but it gives organizers a place to verify deposits.</p></article>
+        <article><h3>Who can approve bookings?</h3><p>Only organizers can review booking requests for events they own. Vendors can request stalls and update payment references from their dashboard.</p></article>
+    </div>
+</section>
+
+<section class="swap-demo">
+    <div>
+        <span>Book a smarter event flow</span>
+        <h2 class="serif">Bring your next bazaar, fair, or expo online in minutes</h2>
+        <p>Use StallBazar to publish events, manage vendor requests, and keep stall bookings transparent from the first click.</p>
+        <a class="bw" asp-controller="Account" asp-action="Register">Get started</a>
+    </div>
+</section>

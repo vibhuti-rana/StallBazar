@@ -1,0 +1,44 @@
+# Build outputs
+bin/
+obj/
+
+# Visual Studio and editor state
+.vs/
+*.user
+*.suo
+*.rsuser
+
+# Local secrets and certificates
+.keys/
+appsettings.Development.json
+appsettings.Local.json
+*.cer
+*.pfx
+*.key
+*.pem
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs and generated QA artifacts
+*.log
+.chrome-ui-review/
+.qa-output/
+.qa-output-auth/
+.qa-workspaces/
+.qa-workspaces-final/
+.qa-workspaces-final2/
+screenshots/
+
+# Uploaded runtime content
+wwwroot/uploads/
+
+# Generated/external report artifacts
+*.docx
+*.pdf
+/ir-report-extracted.txt
+/project-spec-format-extracted.txt

@@ -1,0 +1,50 @@
+@model ProfileSettingsViewModel
+@{
+    ViewData["Title"] = "Settings";
+}
+
+<section class="page-shell narrow swap-page settings-page">
+    <div class="image-swipe-banner compact-banner" data-carousel>
+        <div class="photo-slide active" style="background-image:url('https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=80')"></div>
+        <div class="photo-slide" style="background-image:url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1200&q=80')"></div>
+        <div class="photo-slide" style="background-image:url('https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80')"></div>
+        <div class="banner-copy">
+            <span>Preferences</span>
+            <h2 class="serif">Keep your account secure and simple.</h2>
+        </div>
+    </div>
+    <div class="page-head">
+        <div>
+            <div class="sec-lbl">Account settings</div>
+            <h1 class="serif">Security and preferences</h1>
+            <p>Manage password, color theme, and session settings separately from your public profile.</p>
+        </div>
+        <a class="bo" asp-action="Profile">Edit profile</a>
+    </div>
+    <div class="panel form-panel">
+        <h2>Security</h2>
+        <form asp-action="ChangePassword" method="post" class="form-panel compact">
+            <label for="CurrentPassword">Current password</label>
+            <div class="password-field"><input class="form-control" id="CurrentPassword" name="CurrentPassword" type="password" data-password-input /><button type="button" data-password-toggle>Show</button></div>
+            <label for="NewPassword">New password</label>
+            <div class="password-field"><input class="form-control" id="NewPassword" name="NewPassword" type="password" data-password-input /><button type="button" data-password-toggle>Show</button></div>
+            <label for="ConfirmPassword">Confirm new password</label>
+            <div class="password-field"><input class="form-control" id="ConfirmPassword" name="ConfirmPassword" type="password" data-password-input /><button type="button" data-password-toggle>Show</button></div>
+            <button class="bo" type="submit">Change password</button>
+        </form>
+        <div class="settings-row">
+            <div>
+                <strong>Color theme</strong>
+                <p class="muted mb-0">Switch between light and dark display.</p>
+            </div>
+            <button class="bo small" type="button" data-theme-toggle>Light / Dark</button>
+        </div>
+        <form asp-action="Logout" method="post">
+            <button class="bo" type="submit">Logout</button>
+        </form>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

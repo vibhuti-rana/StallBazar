@@ -1,0 +1,141 @@
+@model Booking
+@{
+    ViewData["Title"] = "Review booking";
+    var vendor = Model.Vendor;
+    var vendorImage = string.IsNullOrWhiteSpace(vendor?.ProfileImageUrl) ? "/images/avatar-placeholder.svg" : vendor.ProfileImageUrl;
+    var vendorBusiness = string.IsNullOrWhiteSpace(vendor?.BusinessName) ? "Independent vendor" : vendor.BusinessName;
+    var stallPrice = Model.Stall?.Price ?? 0;
+    var depositRequired = stallPrice / 2;
+    var stallSize = Model.Stall is null
+        ? "Not available"
+        : string.IsNullOrWhiteSpace(Model.Stall.Size)
+            ? $"{Model.Stall.Length:0.##}m x {Model.Stall.Breadth:0.##}m"
+            : Model.Stall.Size;
+}
+
+<section class="page-shell review-page review-workspace-page">
+    <div class="event-detail-topbar">
+        <a class="back-link" asp-controller="Dashboard" asp-action="Organizer"><span aria-hidden="true">&larr;</span> Organizer workspace</a>
+    </div>
+
+    <div class="review-workspace-head">
+        <div>
+            <div class="sec-lbl">Booking review</div>
+            <h1>@Model.Event?.Name</h1>
+            <p>Review who is requesting the stall, verify the deposit reference, then approve or reject the application.</p>
+        </div>
+        <span class="status @Model.Status.ToString().ToLowerInvariant()">@Model.Status</span>
+    </div>
+
+    <div class="review-workspace-grid">
+        <main class="review-main">
+            <section class="workspace-panel requester-profile-card">
+                <div class="requester-profile-head">
+                    <img src="@vendorImage" alt="@vendor?.FullName profile photo" />
+                    <div>
+                        <span class="panel-eyebrow">Requester</span>
+                        <h2>@(vendor?.FullName ?? "Vendor profile unavailable")</h2>
+                        <p>@vendorBusiness</p>
+                    </div>
+                </div>
+                <div class="requester-facts">
+                    <div><span>Email</span><strong>@(vendor?.Email ?? "Not available")</strong></div>
+                    <div><span>Phone</span><strong>@(string.IsNullOrWhiteSpace(vendor?.PhoneNumber) ? "Not listed" : vendor.PhoneNumber)</strong></div>
+                    <div><span>City</span><strong>@(string.IsNullOrWhiteSpace(vendor?.City) ? "Not listed" : vendor.City)</strong></div>
+                    <div><span>Requested</span><strong>@Model.RequestedAt.ToLocalTime().ToString("MMM d, yyyy h:mm tt")</strong></div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(vendor?.Bio))
+                {
+                    <div class="requester-bio">
+                        <span>Profile note</span>
+                        <p>@vendor.Bio</p>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.VendorNote))
+                {
+                    <div class="requester-bio">
+                        <span>Application message</span>
+                        <p>@Model.VendorNote</p>
+                    </div>
+                }
+            </section>
+
+            @if (Model.Status == BookingStatus.Pending)
+            {
+                <section class="workspace-panel">
+                    <div class="panel-heading-row">
+                        <div>
+                            <span class="panel-eyebrow">Decision</span>
+                            <h2>Approve or reject this request</h2>
+                            <p>Approval books the stall and rejects competing pending requests for the same stall.</p>
+                        </div>
+                    </div>
+                    <div class="review-actions-grid">
+                        <form asp-action="Approve" method="post" class="form-panel compact">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <label>Approval note</label>
+                            <textarea class="form-control" name="organizerNote" maxlength="800" rows="3" placeholder="Optional confirmation details for the vendor"></textarea>
+                            @if (Model.PaymentStatus == PaymentStatus.Submitted || Model.PaymentStatus == PaymentStatus.Verified)
+                            {
+                                <button class="bp" type="submit">Approve booking</button>
+                            }
+                            else
+                            {
+                                <button class="bp" type="button" disabled title="A deposit reference is required before approval">Awaiting deposit reference</button>
+                            }
+                        </form>
+                        <form asp-action="Reject" method="post" class="form-panel compact" data-confirm="Reject this booking request and release the stall?">
+                            <input type="hidden" name="id" value="@Model.Id" />
+                            <label>Rejection reason</label>
+                            <textarea class="form-control" name="organizerNote" maxlength="800" rows="3" placeholder="Explain why this request cannot be approved"></textarea>
+                            <button class="bo" type="submit">Reject booking</button>
+                        </form>
+                    </div>
+                </section>
+            }
+            else
+            {
+                <div class="review-complete" role="status">
+                    <strong>Review completed</strong>
+                    <span>This request is @Model.Status.ToString().ToLowerInvariant() and can no longer be changed.</span>
+                </div>
+            }
+        </main>
+
+        <aside class="review-sidebar">
+            <section class="workspace-panel booking-fact-card">
+                <span class="panel-eyebrow">Stall and payment</span>
+                <h2>Stall @Model.Stall?.Number</h2>
+                <dl>
+                    <div><dt>Category</dt><dd>@StallTiers.Normalize(Model.Stall?.Tier)</dd></div>
+                    <div><dt>Vendor type</dt><dd>@Model.Stall?.Type</dd></div>
+                    <div><dt>Zone</dt><dd>@Model.Stall?.Zone</dd></div>
+                    <div><dt>Size</dt><dd>@stallSize</dd></div>
+                    <div><dt>Full price</dt><dd>Rs. @stallPrice.ToString("N0")</dd></div>
+                    <div><dt>Deposit required</dt><dd>Rs. @depositRequired.ToString("N0")</dd></div>
+                    <div><dt>Payment status</dt><dd><span class="payment-pill @Model.PaymentStatus.ToString().ToLowerInvariant()">@Model.PaymentStatus</span></dd></div>
+                </dl>
+                @if (!string.IsNullOrWhiteSpace(Model.PaymentReference))
+                {
+                    <div class="payment-reference-box">
+                        <span>Payment reference</span>
+                        <strong>@Model.PaymentReference</strong>
+                    </div>
+                }
+                @if (Model.Status == BookingStatus.Pending)
+                {
+                    <form asp-action="UpdatePaymentStatus" method="post" class="payment-review-form">
+                        <input type="hidden" name="id" value="@Model.Id" />
+                        <label for="paymentStatus">Payment status</label>
+                        <select class="form-select" id="paymentStatus" name="paymentStatus">
+                            <option value="Submitted">Submitted</option>
+                            <option value="Verified">Verified</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                        <button class="bo small" type="submit">Update payment</button>
+                    </form>
+                }
+            </section>
+        </aside>
+    </div>
+</section>

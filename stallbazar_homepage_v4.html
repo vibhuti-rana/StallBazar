@@ -1,0 +1,302 @@
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --rose:#C9184A;
+  --rose-h:#A01040;
+  --rose-pale:#FFF0F3;
+  --rose-mid:#FFB3C6;
+  --ink:#1A1025;
+  --ink-mid:#4A3F5C;
+  --ink-soft:#8B7FA0;
+  --surface:#F8F7FA;
+  --white:#FFFFFF;
+  --bd:#EDE8F5;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--white);color:var(--ink);}
+.serif{font-family:Georgia,'Times New Roman',serif;}
+
+nav{background:var(--white);border-bottom:1px solid var(--bd);padding:1rem 2.5rem;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:Georgia,serif;font-size:1.4rem;font-weight:700;color:var(--ink);}
+.logo span{color:var(--rose);}
+.nlinks{display:flex;gap:1.8rem;align-items:center;}
+.nlinks a{text-decoration:none;color:var(--ink-mid);font-size:0.82rem;transition:color 0.2s;}
+.nlinks a:hover{color:var(--rose);}
+.ncta{background:var(--rose) !important;color:#fff !important;padding:0.45rem 1.3rem;border-radius:2px;font-size:0.74rem !important;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;}
+
+.hero{padding:5rem 2.5rem 5.5rem;background:var(--white);text-align:center;position:relative;overflow:hidden;}
+.vl{position:absolute;width:1px;background:var(--bd);top:0;bottom:0;pointer-events:none;}
+.eyebrow{display:inline-block;font-size:0.66rem;font-weight:500;letter-spacing:0.2em;text-transform:uppercase;color:var(--rose);border:1px solid var(--rose-mid);padding:0.3rem 1rem;border-radius:2px;margin-bottom:1.8rem;}
+.hero h1{font-family:Georgia,serif;font-size:clamp(2.4rem,5vw,4.2rem);font-weight:400;line-height:1.1;color:var(--ink);letter-spacing:-0.02em;margin-bottom:1.3rem;}
+.hero h1 em{color:var(--rose);font-style:italic;}
+.hero-sub{font-size:0.97rem;color:var(--ink-soft);line-height:1.8;max-width:480px;margin:0 auto 2.5rem;font-weight:300;}
+.hbtns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;}
+.bp{background:var(--rose);color:#fff;border:none;padding:0.78rem 2rem;border-radius:2px;font-size:0.76rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s,transform 0.15s;}
+.bp:hover{background:var(--rose-h);transform:translateY(-1px);}
+.bo{background:transparent;color:var(--ink);border:1px solid var(--bd);padding:0.78rem 2rem;border-radius:2px;font-size:0.76rem;font-weight:400;letter-spacing:0.07em;cursor:pointer;transition:border-color 0.2s,color 0.2s;}
+.bo:hover{border-color:var(--rose);color:var(--rose);}
+
+.ticker-wrap{border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);overflow:hidden;padding:0.85rem 0;background:var(--white);}
+.ticker{display:flex;animation:tkr 26s linear infinite;width:max-content;}
+.ti{display:flex;align-items:center;gap:1rem;padding:0 2.2rem;font-size:0.67rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-soft);white-space:nowrap;}
+.td{width:3px;height:3px;border-radius:50%;background:var(--rose);flex-shrink:0;}
+@keyframes tkr{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--bd);}
+.sc{padding:2.2rem 1.5rem;text-align:center;border-right:1px solid var(--bd);}
+.sc:last-child{border-right:none;}
+.sn{font-family:Georgia,serif;font-size:2.6rem;font-weight:400;color:var(--ink);line-height:1;display:block;margin-bottom:0.3rem;}
+.sn em{color:var(--rose);font-style:normal;}
+.sl{font-size:0.67rem;letter-spacing:0.13em;text-transform:uppercase;color:var(--ink-soft);}
+
+.sec{padding:4rem 2.5rem;}
+.sec-lbl{font-size:0.64rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--rose);font-weight:500;margin-bottom:0.85rem;}
+.sec-h{font-family:Georgia,serif;font-size:clamp(1.7rem,3vw,2.5rem);font-weight:400;color:var(--ink);line-height:1.2;letter-spacing:-0.01em;}
+.sec-s{font-size:0.9rem;color:var(--ink-soft);line-height:1.8;max-width:440px;margin-top:0.65rem;font-weight:300;}
+
+.feat-bg{background:var(--surface);}
+.feat-inner{max-width:1060px;margin:0 auto;}
+.feat-hd{margin-bottom:3rem;}
+.fg{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--bd);}
+.fc{background:var(--white);padding:2.2rem 1.8rem;}
+.fi{width:36px;height:36px;border:1px solid var(--bd);border-radius:2px;display:flex;align-items:center;justify-content:center;margin-bottom:1.3rem;color:var(--rose);}
+.fc h3{font-family:Georgia,serif;font-size:1.15rem;font-weight:400;color:var(--ink);margin-bottom:0.5rem;}
+.fc p{font-size:0.81rem;color:var(--ink-soft);line-height:1.75;font-weight:300;}
+
+.how-inner{max-width:920px;margin:0 auto;}
+.how-hd{margin-bottom:3.5rem;}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;}
+.steps::before{content:'';position:absolute;top:1.35rem;left:12.5%;right:12.5%;height:1px;background:var(--bd);}
+.step{text-align:center;padding:0 0.8rem;}
+.stpn{width:2.7rem;height:2.7rem;border-radius:50%;background:var(--white);border:1px solid var(--rose-mid);display:flex;align-items:center;justify-content:center;margin:0 auto 1.1rem;font-family:Georgia,serif;font-size:0.95rem;font-weight:400;color:var(--rose);position:relative;z-index:2;}
+.step h4{font-family:Georgia,serif;font-size:1rem;font-weight:400;color:var(--ink);margin-bottom:0.35rem;}
+.step p{font-size:0.77rem;color:var(--ink-soft);line-height:1.65;font-weight:300;}
+
+.roles-bg{background:var(--rose-pale);}
+.roles-inner{max-width:920px;margin:0 auto;}
+.roles-hd{margin-bottom:3rem;}
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:1.3rem;}
+.rc{background:var(--white);border:1px solid var(--bd);border-radius:3px;padding:2.2rem;}
+.rtag{display:inline-block;font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--rose);border:1px solid var(--rose-mid);padding:0.2rem 0.65rem;border-radius:2px;margin-bottom:1.1rem;}
+.rc h3{font-family:Georgia,serif;font-size:1.4rem;font-weight:400;color:var(--ink);margin-bottom:0.35rem;}
+.rc .rd{font-size:0.83rem;color:var(--ink-soft);margin-bottom:1.3rem;line-height:1.65;font-weight:300;}
+.rl{list-style:none;display:flex;flex-direction:column;gap:0.5rem;}
+.rl li{display:flex;align-items:center;gap:0.65rem;font-size:0.82rem;color:var(--ink-mid);}
+.rl li::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--rose);flex-shrink:0;}
+
+.slider-sec{overflow:hidden;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);padding:3rem 0;background:var(--white);}
+.strack{display:flex;animation:sleft 30s linear infinite;width:max-content;}
+.scard{min-width:240px;padding:1.6rem 2rem;border-right:1px solid var(--bd);flex-shrink:0;}
+.scat{font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--rose);margin-bottom:0.45rem;}
+.stitle{font-family:Georgia,serif;font-size:1.05rem;font-weight:400;color:var(--ink);margin-bottom:0.2rem;}
+.sdet{font-size:0.77rem;color:var(--ink-soft);font-weight:300;}
+@keyframes sleft{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+.cta-sec{background:var(--ink);padding:5rem 2.5rem;text-align:center;}
+.cta-inner{max-width:620px;margin:0 auto;}
+.cta-lbl{font-size:0.64rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--rose-mid);margin-bottom:1.1rem;}
+.cta-sec h2{font-family:Georgia,serif;font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:400;color:#fff;line-height:1.15;letter-spacing:-0.01em;margin-bottom:0.9rem;}
+.cta-sec h2 em{color:var(--rose-mid);font-style:italic;}
+.cta-sec p{font-size:0.9rem;color:rgba(255,255,255,0.42);line-height:1.8;margin-bottom:2.3rem;font-weight:300;}
+.bw{background:#fff;color:var(--ink);border:none;padding:0.82rem 2.2rem;border-radius:2px;font-size:0.76rem;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:background 0.2s,transform 0.15s;}
+.bw:hover{background:#f0eaf5;transform:translateY(-1px);}
+
+footer{background:var(--white);border-top:1px solid var(--bd);padding:1.6rem 2.5rem;display:flex;align-items:center;justify-content:space-between;}
+.fl{font-family:Georgia,serif;font-size:1rem;font-weight:700;color:var(--ink);}
+.fl span{color:var(--rose);}
+.fr{font-size:0.7rem;color:var(--ink-soft);}
+</style>
+
+<nav>
+  <div class="logo">Stall<span>Bazar</span></div>
+  <div class="nlinks">
+    <a href="#">Features</a>
+    <a href="#">How it works</a>
+    <a href="#">Events</a>
+    <a href="#" class="ncta">Get started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="vl" style="left:20%;"></div>
+  <div class="vl" style="left:80%;"></div>
+  <div class="eyebrow">Stall booking, reimagined</div>
+  <h1 class="serif">Where events come<br>to <em>life.</em></h1>
+  <p class="hero-sub">A beautifully simple platform connecting event organizers and vendors. Book stalls, manage events and create experiences — all in one place.</p>
+  <div class="hbtns">
+    <button class="bp" onclick="sendPrompt('Help me build the StallBazar registration page')">Book a stall</button>
+    <button class="bo">See how it works</button>
+  </div>
+</section>
+
+<div class="ticker-wrap">
+  <div class="ticker">
+    <div class="ti"><span>Stall booking platform</span><div class="td"></div></div>
+    <div class="ti"><span>Event management</span><div class="td"></div></div>
+    <div class="ti"><span>Vendor registration</span><div class="td"></div></div>
+    <div class="ti"><span>Live stall layouts</span><div class="td"></div></div>
+    <div class="ti"><span>Instant approvals</span><div class="td"></div></div>
+    <div class="ti"><span>Zero double bookings</span><div class="td"></div></div>
+    <div class="ti"><span>Role-based access</span><div class="td"></div></div>
+    <div class="ti"><span>Real-time tracking</span><div class="td"></div></div>
+    <div class="ti"><span>Stall booking platform</span><div class="td"></div></div>
+    <div class="ti"><span>Event management</span><div class="td"></div></div>
+    <div class="ti"><span>Vendor registration</span><div class="td"></div></div>
+    <div class="ti"><span>Live stall layouts</span><div class="td"></div></div>
+    <div class="ti"><span>Instant approvals</span><div class="td"></div></div>
+    <div class="ti"><span>Zero double bookings</span><div class="td"></div></div>
+    <div class="ti"><span>Role-based access</span><div class="td"></div></div>
+    <div class="ti"><span>Real-time tracking</span><div class="td"></div></div>
+  </div>
+</div>
+
+<div class="stats-row">
+  <div class="sc"><span class="sn">500<em>+</em></span><span class="sl">Stalls managed</span></div>
+  <div class="sc"><span class="sn">120<em>+</em></span><span class="sl">Registered vendors</span></div>
+  <div class="sc"><span class="sn">30<em>+</em></span><span class="sl">Events hosted</span></div>
+  <div class="sc"><span class="sn">0</span><span class="sl">Double bookings</span></div>
+</div>
+
+<section class="sec feat-bg">
+  <div class="feat-inner">
+    <div class="feat-hd">
+      <div class="sec-lbl">Platform features</div>
+      <h2 class="sec-h serif">Everything you need to<br>run a flawless event.</h2>
+      <p class="sec-s">Built for organizers who care about details — and vendors who want simplicity.</p>
+    </div>
+    <div class="fg">
+      <div class="fc">
+        <div class="fi"><i class="ti ti-layout-grid" style="font-size:16px;" aria-hidden="true"></i></div>
+        <h3>Visual stall layout</h3>
+        <p>An interactive 2D map so vendors can see availability and pick their spot instantly.</p>
+      </div>
+      <div class="fc">
+        <div class="fi"><i class="ti ti-shield-lock" style="font-size:16px;" aria-hidden="true"></i></div>
+        <h3>Role-based access</h3>
+        <p>Organizers and vendors each get their own secure, tailored dashboard.</p>
+      </div>
+      <div class="fc">
+        <div class="fi"><i class="ti ti-bolt" style="font-size:16px;" aria-hidden="true"></i></div>
+        <h3>Conflict-free booking</h3>
+        <p>Smart concurrency control ensures no two vendors can ever book the same stall.</p>
+      </div>
+      <div class="fc">
+        <div class="fi"><i class="ti ti-chart-bar" style="font-size:16px;" aria-hidden="true"></i></div>
+        <h3>Real-time tracking</h3>
+        <p>Monitor every booking, approval and payment from one unified dashboard.</p>
+      </div>
+      <div class="fc">
+        <div class="fi"><i class="ti ti-check" style="font-size:16px;" aria-hidden="true"></i></div>
+        <h3>Approval workflow</h3>
+        <p>Organizers approve vendor requests in one click. Vendors get notified instantly.</p>
+      </div>
+      <div class="fc">
+        <div class="fi"><i class="ti ti-device-desktop" style="font-size:16px;" aria-hidden="true"></i></div>
+        <h3>Works everywhere</h3>
+        <p>Fully browser-based — no app install needed, works on any device.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec">
+  <div class="how-inner">
+    <div class="how-hd">
+      <div class="sec-lbl">Simple process</div>
+      <h2 class="sec-h serif">From listing to launch<br>in four steps.</h2>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="stpn">01</div>
+        <h4>Create your event</h4>
+        <p>Organizers set up the event, define the stall layout and pricing.</p>
+      </div>
+      <div class="step">
+        <div class="stpn">02</div>
+        <h4>Browse and request</h4>
+        <p>Vendors explore the live map and submit a booking request.</p>
+      </div>
+      <div class="step">
+        <div class="stpn">03</div>
+        <h4>Review and approve</h4>
+        <p>Organizers confirm bookings safely and instantly.</p>
+      </div>
+      <div class="step">
+        <div class="stpn">04</div>
+        <h4>Event day</h4>
+        <p>Everyone shows up ready. No confusion, no conflicts.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec roles-bg">
+  <div class="roles-inner">
+    <div class="roles-hd">
+      <div class="sec-lbl">Who is StallBazar for</div>
+      <h2 class="sec-h serif">Two roles, one platform.</h2>
+      <p class="sec-s">Designed for both sides of every event — equally and thoughtfully.</p>
+    </div>
+    <div class="rg">
+      <div class="rc">
+        <div class="rtag">Organizer</div>
+        <h3>Event organizers</h3>
+        <p class="rd">Take complete control of your events from planning to execution.</p>
+        <ul class="rl">
+          <li>Create and manage events</li>
+          <li>Design interactive stall layouts</li>
+          <li>Review and approve vendor requests</li>
+          <li>Track payments and booking status</li>
+          <li>Manage all registered vendors</li>
+        </ul>
+      </div>
+      <div class="rc">
+        <div class="rtag">Vendor</div>
+        <h3>Stall vendors</h3>
+        <p class="rd">Find your ideal spot and show up ready — without the hassle.</p>
+        <ul class="rl">
+          <li>Browse upcoming events</li>
+          <li>View the interactive stall map</li>
+          <li>Submit booking requests easily</li>
+          <li>Track your booking status</li>
+          <li>Manage your vendor profile</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="slider-sec">
+  <div class="strack">
+    <div class="scard"><div class="scat">Food &amp; Beverage</div><div class="stitle">Street food festivals</div><div class="sdet">Curated food stalls</div></div>
+    <div class="scard"><div class="scat">Arts &amp; Craft</div><div class="stitle">Artisan markets</div><div class="sdet">Handcrafted goods</div></div>
+    <div class="scard"><div class="scat">Technology</div><div class="stitle">Tech exhibitions</div><div class="sdet">Innovation showcases</div></div>
+    <div class="scard"><div class="scat">Culture</div><div class="stitle">Cultural fairs</div><div class="sdet">Heritage experiences</div></div>
+    <div class="scard"><div class="scat">Fashion</div><div class="stitle">Fashion bazaars</div><div class="sdet">Designer &amp; boutique</div></div>
+    <div class="scard"><div class="scat">Education</div><div class="stitle">Campus fairs</div><div class="sdet">Academic exhibitions</div></div>
+    <div class="scard"><div class="scat">Wellness</div><div class="stitle">Wellness markets</div><div class="sdet">Health &amp; beauty</div></div>
+    <div class="scard"><div class="scat">Community</div><div class="stitle">Charity events</div><div class="sdet">Local fundraisers</div></div>
+    <div class="scard"><div class="scat">Food &amp; Beverage</div><div class="stitle">Street food festivals</div><div class="sdet">Curated food stalls</div></div>
+    <div class="scard"><div class="scat">Arts &amp; Craft</div><div class="stitle">Artisan markets</div><div class="sdet">Handcrafted goods</div></div>
+    <div class="scard"><div class="scat">Technology</div><div class="stitle">Tech exhibitions</div><div class="sdet">Innovation showcases</div></div>
+    <div class="scard"><div class="scat">Culture</div><div class="stitle">Cultural fairs</div><div class="sdet">Heritage experiences</div></div>
+    <div class="scard"><div class="scat">Fashion</div><div class="stitle">Fashion bazaars</div><div class="sdet">Designer &amp; boutique</div></div>
+    <div class="scard"><div class="scat">Education</div><div class="stitle">Campus fairs</div><div class="sdet">Academic exhibitions</div></div>
+    <div class="scard"><div class="scat">Wellness</div><div class="stitle">Wellness markets</div><div class="sdet">Health &amp; beauty</div></div>
+    <div class="scard"><div class="scat">Community</div><div class="stitle">Charity events</div><div class="sdet">Local fundraisers</div></div>
+  </div>
+</div>
+
+<section class="cta-sec">
+  <div class="cta-inner">
+    <div class="cta-lbl">Start today</div>
+    <h2 class="serif">Ready to make your next<br>event <em>unforgettable?</em></h2>
+    <p>Join organizers and vendors already using StallBazar to run smoother, more successful events.</p>
+    <button class="bw" onclick="sendPrompt('How do I get started building StallBazar step by step?')">Get started for free</button>
+  </div>
+</section>
+
+<footer>
+  <div class="fl">Stall<span>Bazar</span></div>
+  <div class="fr">Final Year Project &nbsp;&middot;&nbsp; Vibhuti RL Rana &nbsp;&middot;&nbsp; Asia Pacific University &nbsp;&middot;&nbsp; 2025</div>
+</footer>

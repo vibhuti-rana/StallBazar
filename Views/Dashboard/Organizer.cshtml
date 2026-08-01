@@ -1,0 +1,233 @@
+@model OrganizerDashboardViewModel
+@{
+    ViewData["Title"] = "Organizer workspace";
+    var now = DateTime.Now;
+    var organizerName = Model.Organizer?.FullName ?? User.Identity?.Name ?? "Organizer";
+    var firstName = organizerName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "Organizer";
+    var upcomingEvents = Model.Events.Where(e => e.EndsAt >= now).OrderBy(e => e.StartsAt).ToList();
+    var nextEvent = upcomingEvents.FirstOrDefault();
+    var allStalls = Model.Events.SelectMany(e => e.Stalls).ToList();
+    var bookedStalls = allStalls.Count(s => s.Status == StallStatus.Booked);
+    var availableStalls = allStalls.Count(s => s.Status == StallStatus.Available);
+    var submittedDeposits = Model.PendingBookings.Count(b => b.PaymentStatus == PaymentStatus.Submitted);
+    var incompleteEvents = Model.Events.Count(e => string.IsNullOrWhiteSpace(e.ImageUrl) || string.IsNullOrWhiteSpace(e.MapImageUrl) || !e.Stalls.Any() || string.IsNullOrWhiteSpace(e.VendorRequirements));
+    var bookedValue = allStalls.Where(s => s.Status == StallStatus.Booked).Sum(s => s.Price);
+}
+
+<section class="page-shell dashboard-page organizer-workspace operations-workspace">
+    <div class="workspace-head">
+        <div>
+            <div class="workspace-context"><span class="live-dot"></span> Organizer workspace</div>
+            <h1>Good @((now.Hour < 12) ? "morning" : (now.Hour < 17) ? "afternoon" : "evening"), @firstName.</h1>
+            <p>Manage event readiness, vendor applications, deposits, and stall occupancy from one operational view.</p>
+        </div>
+        <div class="workspace-head-actions">
+            <a class="bo" asp-controller="Events" asp-action="Index">View public marketplace</a>
+            <a class="bp" asp-controller="Events" asp-action="Create">Create new event</a>
+        </div>
+    </div>
+
+    <div class="operations-summary" aria-label="Organizer summary">
+        <a class="operation-metric" href="#events">
+            <span class="metric-label">Upcoming events</span>
+            <strong>@upcomingEvents.Count</strong>
+            <small>@(nextEvent is null ? "No event scheduled" : $"Next: {nextEvent.StartsAt:MMM d}")</small>
+        </a>
+        <a class="operation-metric" href="#applications">
+            <span class="metric-label">Applications to review</span>
+            <strong>@Model.PendingBookings.Count</strong>
+            <small>@submittedDeposits with deposit references</small>
+        </a>
+        <a class="operation-metric" href="#events">
+            <span class="metric-label">Stall occupancy</span>
+            <strong>@bookedStalls / @allStalls.Count</strong>
+            <small>@availableStalls still available</small>
+        </a>
+        <div class="operation-metric">
+            <span class="metric-label">Confirmed stall value</span>
+            <strong>Rs. @bookedValue.ToString("N0")</strong>
+            <small>Based on booked stall prices</small>
+        </div>
+    </div>
+
+    <div class="attention-grid">
+        <a class="attention-card @(Model.PendingBookings.Any() ? "urgent" : "complete")" href="#applications">
+            <span class="attention-icon" aria-hidden="true">01</span>
+            <div><strong>@Model.PendingBookings.Count applications waiting</strong><small>Respond quickly so vendors can plan inventory and staffing.</small></div>
+            <span class="attention-link">Review queue</span>
+        </a>
+        <a class="attention-card @(submittedDeposits > 0 ? "warning" : "complete")" href="#applications">
+            <span class="attention-icon" aria-hidden="true">02</span>
+            <div><strong>@submittedDeposits deposits ready</strong><small>Check submitted references before confirming a stall.</small></div>
+            <span class="attention-link">Verify payments</span>
+        </a>
+        <a class="attention-card @(incompleteEvents > 0 ? "warning" : "complete")" href="#events">
+            <span class="attention-icon" aria-hidden="true">03</span>
+            <div><strong>@incompleteEvents listings need attention</strong><small>Add a cover, map, vendor terms, and stall inventory to build confidence.</small></div>
+            <span class="attention-link">Improve listings</span>
+        </a>
+    </div>
+
+    <div class="operations-layout">
+        <div class="operations-main">
+            <section class="workspace-panel" id="events">
+                <div class="panel-heading-row">
+                    <div>
+                        <span class="panel-eyebrow">Portfolio</span>
+                        <h2>Your events</h2>
+                        <p>Readiness and capacity are calculated from the information vendors can actually see.</p>
+                    </div>
+                    <a class="text-link" asp-controller="Events" asp-action="Create">Add event <span aria-hidden="true">&rarr;</span></a>
+                </div>
+
+                <div class="event-operations-list">
+                    @foreach (var ev in Model.Events.OrderBy(e => e.StartsAt))
+                    {
+                        var stallCount = ev.Stalls.Count;
+                        var eventBooked = ev.Stalls.Count(s => s.Status == StallStatus.Booked);
+                        var eventPending = ev.Stalls.Count(s => s.Status == StallStatus.Pending);
+                        var eventAvailable = ev.Stalls.Count(s => s.Status == StallStatus.Available);
+                        var occupancy = stallCount == 0 ? 0 : (eventBooked * 100m / stallCount);
+                        var readinessCount = 0;
+                        if (!string.IsNullOrWhiteSpace(ev.ImageUrl)) readinessCount++;
+                        if (!string.IsNullOrWhiteSpace(ev.MapImageUrl)) readinessCount++;
+                        if (stallCount > 0) readinessCount++;
+                        if (!string.IsNullOrWhiteSpace(ev.VendorRequirements)) readinessCount++;
+                        if (!string.IsNullOrWhiteSpace(ev.ContactEmail)) readinessCount++;
+                        var readiness = readinessCount * 20;
+                        var lifecycle = ev.EndsAt < now ? "Ended" : ev.StartsAt <= now ? "Live" : "Scheduled";
+                        var image = string.IsNullOrWhiteSpace(ev.ImageUrl)
+                            ? "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=80"
+                            : ev.ImageUrl;
+
+                        <article class="event-operation-card">
+                            <div class="event-operation-cover" style="background-image:url('@image')">
+                                <span class="lifecycle-badge @lifecycle.ToLowerInvariant()">@lifecycle</span>
+                            </div>
+                            <div class="event-operation-body">
+                                <div class="event-operation-title">
+                                    <div>
+                                        <span>@ev.Category</span>
+                                        <h3>@ev.Name</h3>
+                                    </div>
+                                    <div class="event-date-block"><strong>@ev.StartsAt.ToString("dd")</strong><span>@ev.StartsAt.ToString("MMM")</span></div>
+                                </div>
+                                <p class="event-location">@ev.Venue &middot; @ev.StartsAt.ToString("h:mm tt") - @ev.EndsAt.ToString("h:mm tt")</p>
+
+                                <div class="capacity-line">
+                                    <div><span>Booked @eventBooked</span><span>Pending @eventPending</span><span>Available @eventAvailable</span></div>
+                                    <strong>@occupancy.ToString("0")% occupied</strong>
+                                </div>
+                                <div class="progress-track" aria-label="@occupancy.ToString("0") percent occupied"><span style="width:@($"{occupancy:0.#}%")"></span></div>
+
+                                <div class="readiness-row">
+                                    <div>
+                                        <span>Listing readiness</span>
+                                        <strong>@readiness%</strong>
+                                    </div>
+                                    <div class="readiness-flags">
+                                        <span class="@(string.IsNullOrWhiteSpace(ev.ImageUrl) ? "missing" : "ready")">Cover</span>
+                                        <span class="@(string.IsNullOrWhiteSpace(ev.MapImageUrl) ? "missing" : "ready")">Map</span>
+                                        <span class="@(stallCount == 0 ? "missing" : "ready")">Stalls</span>
+                                        <span class="@(string.IsNullOrWhiteSpace(ev.VendorRequirements) ? "missing" : "ready")">Terms</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="event-operation-actions">
+                                <a class="bp small" asp-controller="Events" asp-action="Details" asp-route-id="@ev.Id">Manage event</a>
+                                <a class="bo small" asp-controller="Events" asp-action="Edit" asp-route-id="@ev.Id">Edit details</a>
+                                <a class="bo small" asp-controller="Stalls" asp-action="Create" asp-route-eventId="@ev.Id">Generate stalls</a>
+                            </div>
+                        </article>
+                    }
+                    @if (!Model.Events.Any())
+                    {
+                        <div class="empty-state action-empty">
+                            <span class="empty-number">01</span>
+                            <strong>Create your first credible event listing</strong>
+                            <p>Add dates, vendor terms, contact details, expected attendance, media, and stall inventory.</p>
+                            <a class="bp" asp-controller="Events" asp-action="Create">Create event</a>
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="workspace-panel" id="applications">
+                <div class="panel-heading-row">
+                    <div>
+                        <span class="panel-eyebrow">Vendor pipeline</span>
+                        <h2>Applications requiring a decision</h2>
+                        <p>Review the vendor, stall, note, and deposit status before approval.</p>
+                    </div>
+                    <span class="queue-count">@Model.PendingBookings.Count open</span>
+                </div>
+                <div class="application-table-wrap">
+                    @if (Model.PendingBookings.Any())
+                    {
+                        <table class="application-table">
+                            <thead><tr><th>Vendor</th><th>Event and stall</th><th>Requested</th><th>Deposit</th><th></th></tr></thead>
+                            <tbody>
+                                @foreach (var booking in Model.PendingBookings)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="application-vendor-cell">
+                                                <img src="@(string.IsNullOrWhiteSpace(booking.Vendor?.ProfileImageUrl) ? "/images/avatar-placeholder.svg" : booking.Vendor.ProfileImageUrl)" alt="" />
+                                                <div>
+                                                    <strong>@booking.Vendor?.FullName</strong>
+                                                    <small>@(string.IsNullOrWhiteSpace(booking.Vendor?.BusinessName) ? "Independent vendor" : booking.Vendor.BusinessName)</small>
+                                                    <small>@(string.IsNullOrWhiteSpace(booking.Vendor?.City) ? "City not listed" : booking.Vendor.City) &middot; @(booking.Vendor?.Email ?? "Email unavailable")</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><strong>@booking.Event?.Name</strong><small>Stall @booking.Stall?.Number &middot; Rs. @booking.Stall?.Price.ToString("N0")</small></td>
+                                        <td><strong>@booking.RequestedAt.ToLocalTime().ToString("MMM d")</strong><small>@booking.RequestedAt.ToLocalTime().ToString("h:mm tt")</small></td>
+                                        <td><span class="payment-pill @booking.PaymentStatus.ToString().ToLowerInvariant()">@booking.PaymentStatus</span></td>
+                                        <td><a class="bp small" asp-controller="Bookings" asp-action="Review" asp-route-id="@booking.Id">Review</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="empty-state compact-empty"><strong>Application queue is clear</strong><p>New vendor requests will appear here with payment and stall details.</p></div>
+                    }
+                </div>
+            </section>
+        </div>
+
+        <aside class="operations-sidebar">
+            <section class="workspace-panel next-event-panel">
+                <span class="panel-eyebrow">Next milestone</span>
+                @if (nextEvent is not null)
+                {
+                    var daysToEvent = Math.Max(0, (nextEvent.StartsAt.Date - now.Date).Days);
+                    <div class="countdown-value">@daysToEvent</div>
+                    <h2>days until @nextEvent.Name</h2>
+                    <p>@nextEvent.StartsAt.ToString("dddd, MMMM d") at @nextEvent.Venue</p>
+                    <a class="bo" asp-controller="Events" asp-action="Details" asp-route-id="@nextEvent.Id">Open event plan</a>
+                }
+                else
+                {
+                    <div class="countdown-value">--</div>
+                    <h2>No upcoming event</h2>
+                    <p>Create an event to begin building your vendor pipeline.</p>
+                    <a class="bo" asp-controller="Events" asp-action="Create">Create event</a>
+                }
+            </section>
+
+            <section class="workspace-panel trust-checklist">
+                <span class="panel-eyebrow">Trust checklist</span>
+                <h2>What vendors need before paying</h2>
+                <ul>
+                    <li><span>1</span><div><strong>Clear organizer identity</strong><small>Business name, contact email, and profile details.</small></div></li>
+                    <li><span>2</span><div><strong>Real venue information</strong><small>Dates, application deadline, facilities, and expected visitors.</small></div></li>
+                    <li><span>3</span><div><strong>Transparent stall terms</strong><small>Price, deposit, dimensions, location, and cancellation rules.</small></div></li>
+                    <li><span>4</span><div><strong>Fast application decisions</strong><small>Review requests while vendor interest is active.</small></div></li>
+                </ul>
+                <a class="text-link" asp-controller="Account" asp-action="Profile">Complete organizer profile <span aria-hidden="true">&rarr;</span></a>
+            </section>
+        </aside>
+    </div>
+</section>

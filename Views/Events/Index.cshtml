@@ -1,0 +1,75 @@
+@model IEnumerable<Event>
+@{
+    ViewData["Title"] = "Browse events";
+    var events = Model.ToList();
+    var openStalls = events.Sum(e => e.Stalls.Count(s => s.Status == StallStatus.Available));
+}
+
+<section class="market-intro">
+    <div>
+        <span class="sec-lbl">Stall marketplace</span>
+        <h1>Find an event worth showing up for.</h1>
+        <p>Compare the organizer, dates, expected audience, application deadline, stall availability, pricing, requirements, and venue layout before you apply.</p>
+        <div class="market-proof"><span><strong>@events.Count</strong> active events</span><span><strong>@openStalls</strong> stalls available</span><span><strong>50%</strong> deposit reference before approval</span></div>
+    </div>
+</section>
+
+<section class="page-shell market-page credible-market-page">
+    <div class="market-toolbar-wrap">
+        <form class="market-toolbar" asp-action="Index" method="get">
+            <label class="visually-hidden" for="event-search">Search events</label>
+            <input id="event-search" class="form-control" name="q" value="@ViewData["EventSearch"]" placeholder="Search event name, venue, or description" />
+            <label class="visually-hidden" for="event-category">Event category</label>
+            <select id="event-category" class="form-select" name="category">
+                <option value="">All categories</option>
+                @foreach (var category in EventCategories.All)
+                {
+                    <option value="@category" selected="@(string.Equals(ViewData["EventCategory"]?.ToString(), category, StringComparison.OrdinalIgnoreCase))">@category</option>
+                }
+            </select>
+            <button class="bp" type="submit">Search events</button>
+        </form>
+        @if (User.IsInRole(SeedData.OrganizerRole)) { <a class="bo" asp-action="Create">Create an event</a> }
+    </div>
+
+    <div class="category-strip credible-category-strip">
+        <a class="category-pill" asp-action="Index">All events</a>
+        @foreach (var category in EventCategories.All) { <a class="category-pill" asp-action="Index" asp-route-category="@category">@category</a> }
+    </div>
+
+    <div class="market-results-head"><div><span class="panel-eyebrow">Open applications</span><h2>Current event opportunities</h2></div><p>@events.Count result@(events.Count == 1 ? "" : "s")</p></div>
+
+    <div class="credible-event-grid">
+        @foreach (var ev in events)
+        {
+            var available = ev.Stalls.Count(s => s.Status == StallStatus.Available);
+            var total = ev.Stalls.Count;
+            var organizer = string.IsNullOrWhiteSpace(ev.Organizer?.BusinessName) ? ev.Organizer?.FullName : ev.Organizer.BusinessName;
+            var eventImage = string.IsNullOrWhiteSpace(ev.ImageUrl)
+                ? "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80"
+                : ev.ImageUrl;
+            <article class="credible-event-card">
+                <div class="credible-card-cover" style="background-image:url('@eventImage')">
+                    <span class="event-card-category">@ev.Category</span>
+                    <div class="event-card-date"><strong>@ev.StartsAt.ToString("dd")</strong><span>@ev.StartsAt.ToString("MMM")</span></div>
+                </div>
+                <div class="credible-card-body">
+                    <div class="credible-card-title"><div><h2>@ev.Name</h2><p>Hosted by <strong>@organizer</strong></p></div><span class="inventory-badge @(available > 0 ? "open" : "full")">@(available > 0 ? $"{available} stalls open" : "Fully allocated")</span></div>
+                    <p class="event-card-venue">@ev.Venue</p>
+                    <p class="event-card-description">@ev.Description</p>
+                    <div class="event-card-facts">
+                        <div><span>Event date</span><strong>@ev.StartsAt.ToString("MMM d, yyyy")</strong></div>
+                        <div><span>Expected visitors</span><strong>@(ev.ExpectedFootfall?.ToString("N0") ?? "Not stated")</strong></div>
+                        <div><span>Stall pricing</span><strong>From Rs. @ev.PriceFrom.ToString("N0")</strong></div>
+                        <div><span>Apply by</span><strong>@(ev.ApplicationDeadline?.ToString("MMM d, h:mm tt") ?? "While available")</strong></div>
+                    </div>
+                    <div class="credible-card-footer"><span>@total total stalls &middot; organizer contact available</span><a class="bp small" asp-action="Details" asp-route-id="@ev.Id">Review event details</a></div>
+                </div>
+            </article>
+        }
+        @if (!events.Any())
+        {
+            <div class="empty-state event-empty"><strong>No matching events are open</strong><p>Try another category or search term. Events disappear from this marketplace after their end date.</p><a class="bo" asp-action="Index">Clear filters</a></div>
+        }
+    </div>
+</section>

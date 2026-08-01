@@ -1,0 +1,137 @@
+@model EventFormViewModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Create event" : "Edit event";
+    var isCreate = Model.Id == 0;
+    var action = isCreate ? "Create" : "Edit";
+    var fallbackCover = "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1200&q=80";
+    var previewCover = string.IsNullOrWhiteSpace(Model.ExistingImageUrl) ? fallbackCover : Model.ExistingImageUrl;
+    var existingMapIsPdf = Model.ExistingMapImageUrl?.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) == true;
+}
+
+<section class="page-shell event-builder-page" data-event-builder data-existing-cover="@(!string.IsNullOrWhiteSpace(Model.ExistingImageUrl) ? "true" : "false")" data-existing-map="@(!string.IsNullOrWhiteSpace(Model.ExistingMapImageUrl) ? "true" : "false")">
+    <div class="event-builder-head">
+        <div>
+            <a class="back-link" asp-controller="Dashboard" asp-action="Organizer"><span aria-hidden="true">&larr;</span> Organizer workspace</a>
+            <div class="sec-lbl">Event publishing</div>
+            <h1>@(isCreate ? "Create an event vendors can trust" : "Improve your event listing")</h1>
+            <p>This information becomes the vendor's basis for committing time, stock, staff, and a deposit. Be specific and transparent.</p>
+        </div>
+        <div class="draft-state"><span></span>@(isCreate ? "New event" : "Editing saved event")</div>
+    </div>
+
+    <nav class="publishing-steps" aria-label="Event setup progress">
+        <div class="active"><span>1</span><div><strong>Event profile</strong><small>Details, terms, and media</small></div></div>
+        <div><span>2</span><div><strong>Stall inventory</strong><small>Pricing and layout positions</small></div></div>
+        <div><span>3</span><div><strong>Vendor ready</strong><small>Review the public listing</small></div></div>
+    </nav>
+
+    <form class="event-builder-form" asp-action="@action" method="post" enctype="multipart/form-data">
+        <input asp-for="Id" type="hidden" />
+
+        <aside class="builder-guidance">
+            <div class="guidance-card sticky-guidance">
+                <span class="panel-eyebrow">Listing readiness</span>
+                <h2>Give vendors enough evidence to decide</h2>
+                <div class="builder-checklist">
+                    <div data-readiness="Name"><span></span><p><strong>Event identity</strong><small>Name, venue, and category</small></p></div>
+                    <div data-readiness="StartsAt"><span></span><p><strong>Dates and deadline</strong><small>Clear planning window</small></p></div>
+                    <div data-readiness="Description"><span></span><p><strong>Vendor brief</strong><small>Audience and event context</small></p></div>
+                    <div data-readiness="VendorRequirements"><span></span><p><strong>Terms and facilities</strong><small>Operational expectations</small></p></div>
+                    <div data-readiness="EventImage"><span></span><p><strong>Real event cover</strong><small>Avoid generic imagery</small></p></div>
+                    <div data-readiness="MapImage"><span></span><p><strong>Venue layout</strong><small>Show entrances and zones</small></p></div>
+                </div>
+                <div class="guidance-note"><strong>What happens next?</strong><p>After saving, generate a full stall batch from a category, prefix, and count instead of creating every stall manually.</p></div>
+            </div>
+        </aside>
+
+        <main class="builder-fields">
+            <div asp-validation-summary="ModelOnly" class="validation-summary text-danger"></div>
+
+            <section class="builder-section" aria-labelledby="identity-title">
+                <div class="builder-section-head"><span>01</span><div><h2 id="identity-title">Event identity</h2><p>Explain what the event is, who it is for, and where it takes place.</p></div></div>
+                <div class="field-grid">
+                    <div class="field full"><label asp-for="Name"></label><input class="form-control" asp-for="Name" placeholder="e.g. Kathmandu Artisan Weekend 2026" data-preview-input="name" /><small class="field-help">Use the public name shown on tickets, posters, and social media.</small><span asp-validation-for="Name" class="text-danger"></span></div>
+                    <div class="field"><label asp-for="Category"></label><select class="form-select" asp-for="Category" asp-items="@(new SelectList(EventCategories.All))" data-preview-input="category"></select><span asp-validation-for="Category" class="text-danger"></span></div>
+                    <div class="field"><label asp-for="ExpectedFootfall"></label><input class="form-control" asp-for="ExpectedFootfall" type="number" min="1" placeholder="e.g. 2500" data-preview-input="footfall" /><small class="field-help">Use a realistic estimate, not a marketing claim.</small><span asp-validation-for="ExpectedFootfall" class="text-danger"></span></div>
+                    <div class="field full"><label asp-for="Venue"></label><input class="form-control" asp-for="Venue" placeholder="Venue name, area, and city" data-preview-input="venue" /><small class="field-help">Include enough location detail for a vendor to estimate travel and logistics.</small><span asp-validation-for="Venue" class="text-danger"></span></div>
+                    <div class="field full"><label asp-for="Description"></label><textarea class="form-control large-textarea" asp-for="Description" rows="7" maxlength="1200" placeholder="Describe the event concept, target audience, past event history or first-year context, promotion plan, and what makes the opportunity valuable to vendors." data-preview-input="description"></textarea><div class="field-meta"><small>Be factual. Include audience and promotion context.</small><small><span data-character-count="Description">0</span>/1200</small></div><span asp-validation-for="Description" class="text-danger"></span></div>
+                </div>
+            </section>
+
+            <section class="builder-section" aria-labelledby="schedule-title">
+                <div class="builder-section-head"><span>02</span><div><h2 id="schedule-title">Schedule, applications, and pricing</h2><p>Give vendors enough time to plan stock, staffing, travel, and payment.</p></div></div>
+                <div class="field-grid">
+                    <div class="field"><label asp-for="StartsAt"></label><input class="form-control" asp-for="StartsAt" type="datetime-local" data-preview-input="date" /><span asp-validation-for="StartsAt" class="text-danger"></span></div>
+                    <div class="field"><label asp-for="EndsAt"></label><input class="form-control" asp-for="EndsAt" type="datetime-local" /><span asp-validation-for="EndsAt" class="text-danger"></span></div>
+                    <div class="field"><label asp-for="ApplicationDeadline"></label><input class="form-control" asp-for="ApplicationDeadline" type="datetime-local" /><small class="field-help">Applications automatically close after this time.</small><span asp-validation-for="ApplicationDeadline" class="text-danger"></span></div>
+                    <div class="field"><label asp-for="PriceFrom"></label><div class="input-prefix"><span>Rs.</span><input class="form-control" asp-for="PriceFrom" min="0" data-preview-input="price" /></div><small class="field-help">The lowest full stall price; vendors submit a 50% reference before approval.</small><span asp-validation-for="PriceFrom" class="text-danger"></span></div>
+                </div>
+            </section>
+
+            <section class="builder-section" aria-labelledby="terms-title">
+                <div class="builder-section-head"><span>03</span><div><h2 id="terms-title">Vendor information and terms</h2><p>Trust improves when responsibilities, facilities, and contact channels are explicit.</p></div></div>
+                <div class="field-grid">
+                    <div class="field"><label asp-for="ContactEmail"></label><input class="form-control" asp-for="ContactEmail" type="email" placeholder="vendors@yourevent.com" /><span asp-validation-for="ContactEmail" class="text-danger"></span></div>
+                    <div class="field"><label asp-for="ContactPhone"></label><input class="form-control" asp-for="ContactPhone" type="tel" placeholder="Organizer support number" /><span asp-validation-for="ContactPhone" class="text-danger"></span></div>
+                    <div class="field full"><label asp-for="Facilities"></label><textarea class="form-control" asp-for="Facilities" rows="4" maxlength="600" placeholder="Electricity, Wi-Fi, tables, chairs, security, parking, loading access, waste collection, water, storage..."></textarea><div class="field-meta"><small>State what is included and what vendors must arrange themselves.</small><small><span data-character-count="Facilities">0</span>/600</small></div><span asp-validation-for="Facilities" class="text-danger"></span></div>
+                    <div class="field full"><label asp-for="VendorRequirements"></label><textarea class="form-control" asp-for="VendorRequirements" rows="5" maxlength="1200" placeholder="Product restrictions, required permits, setup/arrival time, signage rules, equipment limits, cleanup expectations..."></textarea><div class="field-meta"><small>These requirements appear publicly before a vendor applies.</small><small><span data-character-count="VendorRequirements">0</span>/1200</small></div><span asp-validation-for="VendorRequirements" class="text-danger"></span></div>
+                    <div class="field full"><label asp-for="CancellationPolicy"></label><textarea class="form-control" asp-for="CancellationPolicy" rows="4" maxlength="800" placeholder="Explain cancellation deadlines, deposit handling, transfers, event postponement, and organizer cancellation."></textarea><div class="field-meta"><small>A clear policy prevents disputes after payment references are submitted.</small><small><span data-character-count="CancellationPolicy">0</span>/800</small></div><span asp-validation-for="CancellationPolicy" class="text-danger"></span></div>
+                </div>
+            </section>
+
+            <section class="builder-section" aria-labelledby="media-title">
+                <div class="builder-section-head"><span>04</span><div><h2 id="media-title">Event media and stall layout</h2><p>Use real, current visuals. Vendors use them to judge venue quality and stall position.</p></div></div>
+                <div class="media-upload-grid">
+                    <div class="upload-card">
+                        <div class="upload-card-head"><span aria-hidden="true">A</span><div><strong>Event cover</strong><small>JPG, PNG, or WEBP &middot; max 5 MB</small></div></div>
+                        <label class="upload-drop" asp-for="EventImage"><input asp-for="EventImage" type="file" accept="image/png,image/jpeg,image/webp" data-cover-upload /><span>Choose a real event image</span><small>Landscape images work best</small></label>
+                        @if (!string.IsNullOrWhiteSpace(Model.ExistingImageUrl)) { <img class="form-preview" src="@Model.ExistingImageUrl" alt="Current event cover" /> }
+                    </div>
+                    <div class="upload-card">
+                        <div class="upload-card-head"><span aria-hidden="true">B</span><div><strong>Stall layout</strong><small>JPG, PNG, WEBP, or PDF &middot; max 5 MB</small></div></div>
+                        <label class="upload-drop" asp-for="MapImage"><input asp-for="MapImage" type="file" accept="image/png,image/jpeg,image/webp,application/pdf,.pdf" /><span>Upload the floor plan or stall layout</span><small>Image previews inline; PDFs open as layout files</small></label>
+                        @if (!string.IsNullOrWhiteSpace(Model.ExistingMapImageUrl) && existingMapIsPdf)
+                        {
+                            <a class="form-file-preview" href="@Model.ExistingMapImageUrl" target="_blank" rel="noopener">
+                                <strong>Current PDF layout</strong>
+                                <span>Open uploaded stall layout</span>
+                            </a>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(Model.ExistingMapImageUrl))
+                        {
+                            <img class="form-preview" src="@Model.ExistingMapImageUrl" alt="Current stall layout" />
+                        }
+                    </div>
+                </div>
+                <div class="field"><label asp-for="MapHint"></label><input class="form-control" asp-for="MapHint" maxlength="160" placeholder="e.g. Main entrance north, food court west, premium stalls near stage" /><small class="field-help">This short orientation appears above the stall grid.</small><span asp-validation-for="MapHint" class="text-danger"></span></div>
+            </section>
+
+            <div class="builder-action-bar">
+                <div><strong>@(isCreate ? "Ready to build the stall inventory?" : "Ready to update the public listing?")</strong><small>Your information is validated before it is saved.</small></div>
+                <div class="actions"><a class="bo" asp-controller="Dashboard" asp-action="Organizer">Cancel</a><button class="bp" type="submit">@(isCreate ? "Save and add stalls" : "Save event changes")</button></div>
+            </div>
+        </main>
+
+        <aside class="builder-preview">
+            <div class="preview-sticky">
+                <div class="preview-label"><span class="live-dot"></span> Vendor preview</div>
+                <article class="event-live-preview">
+                    <div class="preview-cover" style="background-image:url('@previewCover')" data-preview-cover><span data-preview-category>@Model.Category</span></div>
+                    <div class="preview-content">
+                        <div class="preview-date"><span data-preview-month>@Model.StartsAt.ToString("MMM")</span><strong data-preview-day>@Model.StartsAt.ToString("dd")</strong></div>
+                        <div class="preview-title"><h2 data-preview-name>@(string.IsNullOrWhiteSpace(Model.Name) ? "Your event name" : Model.Name)</h2><p data-preview-venue>@(string.IsNullOrWhiteSpace(Model.Venue) ? "Venue and city" : Model.Venue)</p></div>
+                        <div class="preview-facts"><div><span>Stalls from</span><strong>Rs. <span data-preview-price>@Model.PriceFrom.ToString("N0")</span></strong></div><div><span>Expected visitors</span><strong data-preview-footfall>@(Model.ExpectedFootfall?.ToString("N0") ?? "Not stated")</strong></div></div>
+                        <p class="preview-description" data-preview-description>@(string.IsNullOrWhiteSpace(Model.Description) ? "Your event description will appear here for vendors to review before they open the full listing." : Model.Description)</p>
+                        <div class="preview-trust"><span>Organizer contact provided</span><span>Deposit reviewed before approval</span><span>Stall map shown before request</span></div>
+                        <span class="preview-button">Review stalls</span>
+                    </div>
+                </article>
+                <p class="preview-disclaimer">This is a simplified vendor-facing preview. Stall cards and the full venue map are added in the next step.</p>
+            </div>
+        </aside>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

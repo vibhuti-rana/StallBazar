@@ -1,0 +1,59 @@
+@model ContactViewModel
+@{
+    ViewData["Title"] = "Contact us";
+}
+
+<section class="info-hero swap-subhero" style="background-image:url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1800&q=80')">
+    <div>
+        <span>Contact us</span>
+        <h1 class="serif">Need help with events, stalls, or bookings?</h1>
+        <p>Reach StallBazar for organizer setup, vendor booking support, payment reference questions, and account help.</p>
+    </div>
+</section>
+
+<section class="page-shell swap-page info-page contact-page">
+    <div class="image-swipe-banner" data-carousel>
+        <div class="photo-slide active" style="background-image:url('https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="photo-slide" style="background-image:url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="photo-slide" style="background-image:url('https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="banner-copy">
+            <span>Fast support</span>
+            <h2 class="serif">Help for organizers, vendors, payments, and bookings.</h2>
+        </div>
+    </div>
+    <div class="split-grid">
+        <div class="panel">
+            <h2>Support details</h2>
+            <div class="list-stack">
+                <article class="list-card"><div><h3>Email</h3><p>stallbazar.support@gmail.com</p></div></article>
+                <article class="list-card"><div><h3>Organizer help</h3><p>Event creation, stall layout images, stall tiers, and booking reviews.</p></div></article>
+                <article class="list-card"><div><h3>Vendor help</h3><p>Browsing events, requesting stalls, submitting deposits, and checking status.</p></div></article>
+            </div>
+        </div>
+        <div class="panel contact-panel">
+            <h2>Send a message</h2>
+            <form class="form-panel" asp-action="Contact" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="field"><label asp-for="Name"></label><input class="form-control" asp-for="Name" autocomplete="name" placeholder="Your name" /><span asp-validation-for="Name" class="text-danger"></span></div>
+                <div class="field"><label asp-for="Email"></label><input class="form-control" asp-for="Email" autocomplete="email" placeholder="your@email.com" /><span asp-validation-for="Email" class="text-danger"></span></div>
+                <div class="field">
+                    <label asp-for="Topic"></label>
+                    <select class="form-select" asp-for="Topic">
+                        <option>General support</option>
+                        <option>Vendor booking</option>
+                        <option>Organizer setup</option>
+                        <option>Payment reference</option>
+                        <option>Account access</option>
+                    </select>
+                    <span asp-validation-for="Topic" class="text-danger"></span>
+                </div>
+                <div class="field"><label asp-for="Message"></label><textarea class="form-control" asp-for="Message" rows="6" placeholder="Tell us what you need help with"></textarea><span asp-validation-for="Message" class="text-danger"></span></div>
+                <button class="bp" type="submit">Send inquiry</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

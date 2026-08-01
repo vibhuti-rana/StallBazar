@@ -1,0 +1,207 @@
+@model VendorDashboardViewModel
+@{
+    ViewData["Title"] = "Vendor workspace";
+    var now = DateTime.Now;
+    var vendorName = Model.Vendor?.FullName ?? User.Identity?.Name ?? "Vendor";
+    var firstName = vendorName.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault() ?? "Vendor";
+    var pendingBookings = Model.MyBookings.Count(b => b.Status == BookingStatus.Pending);
+    var approvedBookings = Model.MyBookings.Count(b => b.Status == BookingStatus.Approved);
+    var paymentActions = Model.MyBookings.Count(b => b.Status == BookingStatus.Pending &&
+        (b.PaymentStatus == PaymentStatus.NotSubmitted || b.PaymentStatus == PaymentStatus.Rejected));
+    var availableOpportunities = Model.UpcomingEvents.Sum(e => e.Stalls.Count(s => s.Status == StallStatus.Available));
+}
+
+<section class="page-shell dashboard-page vendor-workspace operations-workspace">
+    <div class="workspace-head vendor-head">
+        <div>
+            <div class="workspace-context"><span class="live-dot"></span> Vendor workspace</div>
+            <h1>Welcome back, @firstName.</h1>
+            <p>Compare credible event opportunities, complete booking actions, and keep every stall request in one place.</p>
+        </div>
+        <div class="workspace-head-actions">
+            <a class="bo" asp-controller="Account" asp-action="Profile">Update business profile</a>
+            <a class="bp" asp-controller="Events" asp-action="Index">Find an event</a>
+        </div>
+    </div>
+
+    <div class="vendor-trust-bar">
+        <div><span aria-hidden="true">01</span><strong>Organizer-owned listings</strong><small>Only the event owner can manage stalls and approve applications.</small></div>
+        <div><span aria-hidden="true">02</span><strong>Transparent deposit status</strong><small>Your reference and review result remain attached to the booking.</small></div>
+        <div><span aria-hidden="true">03</span><strong>Protected stall allocation</strong><small>Database checks prevent two approvals for the same stall.</small></div>
+    </div>
+
+    <div class="operations-summary vendor-summary" aria-label="Vendor summary">
+        <a class="operation-metric" href="#bookings"><span class="metric-label">Active requests</span><strong>@pendingBookings</strong><small>Waiting for a final decision</small></a>
+        <a class="operation-metric" href="#bookings"><span class="metric-label">Confirmed stalls</span><strong>@approvedBookings</strong><small>Approved organizer bookings</small></a>
+        <a class="operation-metric @(paymentActions > 0 ? "needs-action" : null)" href="#bookings"><span class="metric-label">Payment actions</span><strong>@paymentActions</strong><small>@(paymentActions > 0 ? "Deposit reference required" : "No payment action due")</small></a>
+        <a class="operation-metric" href="#opportunities"><span class="metric-label">Open stalls</span><strong>@availableOpportunities</strong><small>Across recommended events</small></a>
+    </div>
+
+    <div class="vendor-layout">
+        <main class="vendor-main">
+            <section class="workspace-panel" id="bookings">
+                <div class="panel-heading-row">
+                    <div>
+                        <span class="panel-eyebrow">My applications</span>
+                        <h2>Booking progress</h2>
+                        <p>See what has happened, what the organizer is reviewing, and what you need to do next.</p>
+                    </div>
+                    <span class="queue-count">@Model.MyBookings.Count total</span>
+                </div>
+
+                <div class="booking-journey-list">
+                    @foreach (var booking in Model.MyBookings)
+                    {
+                        var depositComplete = booking.PaymentStatus is PaymentStatus.Submitted or PaymentStatus.Verified;
+                        var reviewed = booking.Status is BookingStatus.Approved or BookingStatus.Rejected;
+                        var confirmed = booking.Status == BookingStatus.Approved;
+                        var stopped = booking.Status is BookingStatus.Rejected or BookingStatus.Cancelled;
+                        <article class="booking-journey-card @(stopped ? "stopped" : null)">
+                            <div class="booking-journey-head">
+                                <div>
+                                    <span class="booking-event-label">@booking.Event?.Category &middot; @booking.Event?.StartsAt.ToString("MMM d, yyyy")</span>
+                                    <h3>@booking.Event?.Name</h3>
+                                    <p>Stall @booking.Stall?.Number &middot; @booking.Stall?.Tier &middot; @booking.Event?.Venue</p>
+                                </div>
+                                <span class="status @booking.Status.ToString().ToLowerInvariant()">@booking.Status</span>
+                            </div>
+
+                            <div class="booking-progress" aria-label="Booking progress">
+                                <div class="done"><span>1</span><strong>Requested</strong><small>@booking.RequestedAt.ToLocalTime().ToString("MMM d")</small></div>
+                                <div class="@(depositComplete ? "done" : booking.Status == BookingStatus.Pending ? "current" : null)"><span>2</span><strong>Deposit</strong><small>@booking.PaymentStatus</small></div>
+                                <div class="@(reviewed ? "done" : depositComplete && booking.Status == BookingStatus.Pending ? "current" : null)"><span>3</span><strong>Review</strong><small>@(reviewed ? booking.Status.ToString() : "Organizer")</small></div>
+                                <div class="@(confirmed ? "done" : stopped ? "error" : null)"><span>4</span><strong>Confirmed</strong><small>@(confirmed ? "Stall secured" : stopped ? "Closed" : "Pending")</small></div>
+                            </div>
+
+                            <div class="booking-financials">
+                                <div><span>Full stall price</span><strong>Rs. @booking.Stall?.Price.ToString("N0")</strong></div>
+                                <div><span>Required deposit</span><strong>Rs. @((booking.Stall?.Price / 2)?.ToString("N0"))</strong></div>
+                                <div><span>Payment reference</span><strong>@(string.IsNullOrWhiteSpace(booking.PaymentReference) ? "Not submitted" : booking.PaymentReference)</strong></div>
+                            </div>
+
+                            @if (booking.Status == BookingStatus.Pending && booking.PaymentStatus != PaymentStatus.Verified)
+                            {
+                                <div class="booking-next-action">
+                                    <div><strong>@(booking.PaymentStatus == PaymentStatus.Submitted ? "Reference submitted" : "Action required: add your deposit reference")</strong><small>@(booking.PaymentStatus == PaymentStatus.Submitted ? "The organizer can now verify your reference and review the application." : "The organizer cannot approve this booking until a reference is submitted.")</small></div>
+                                    @if (booking.PaymentStatus != PaymentStatus.Submitted)
+                                    {
+                                        <form asp-controller="Bookings" asp-action="UpdatePayment" method="post" class="deposit-form">
+                                            <input type="hidden" name="id" value="@booking.Id" />
+                                            <label class="visually-hidden" for="payment-@booking.Id">Deposit payment reference</label>
+                                            <input id="payment-@booking.Id" class="form-control" name="paymentReference" placeholder="Bank or wallet reference" value="@booking.PaymentReference" maxlength="500" required />
+                                            <button class="bp small" type="submit">Submit reference</button>
+                                        </form>
+                                    }
+                                </div>
+                            }
+                            else if (confirmed)
+                            {
+                                <div class="booking-next-action success-action"><div><strong>Your stall is confirmed</strong><small>Use the organizer contact below if you need to coordinate setup or arrival.</small></div><a class="bo small" href="mailto:@booking.Event?.ContactEmail">Contact organizer</a></div>
+                            }
+                            else if (stopped)
+                            {
+                                <div class="booking-next-action closed-action"><div><strong>This application is closed</strong><small>@(string.IsNullOrWhiteSpace(booking.OrganizerNote) ? "Browse other available events when you are ready." : booking.OrganizerNote)</small></div><a class="bo small" asp-controller="Events" asp-action="Index">Find another event</a></div>
+                            }
+
+                            @if (booking.Status == BookingStatus.Pending)
+                            {
+                                <div class="booking-card-footer">
+                                    <span>Requested @booking.RequestedAt.ToLocalTime().ToString("MMM d, yyyy 'at' h:mm tt")</span>
+                                    <form asp-controller="Bookings" asp-action="Cancel" method="post" data-confirm="Cancel this booking request and release the stall?">
+                                        <input type="hidden" name="id" value="@booking.Id" />
+                                        <button class="text-action danger" type="submit">Cancel application</button>
+                                    </form>
+                                </div>
+                            }
+                        </article>
+                    }
+                    @if (!Model.MyBookings.Any())
+                    {
+                        <div class="empty-state action-empty">
+                            <span class="empty-number">01</span>
+                            <strong>You have not applied for a stall yet</strong>
+                            <p>Compare organizer details, venue information, vendor terms, map position, and price before requesting.</p>
+                            <a class="bp" asp-controller="Events" asp-action="Index">Browse open stalls</a>
+                        </div>
+                    }
+                </div>
+            </section>
+
+            <section class="workspace-panel" id="opportunities">
+                <div class="panel-heading-row">
+                    <div>
+                        <span class="panel-eyebrow">Marketplace</span>
+                        <h2>Open opportunities</h2>
+                        <p>Upcoming listings with active application windows and available inventory.</p>
+                    </div>
+                    <a class="text-link" asp-controller="Events" asp-action="Index">See all events <span aria-hidden="true">&rarr;</span></a>
+                </div>
+                <div class="opportunity-grid">
+                    @foreach (var ev in Model.UpcomingEvents)
+                    {
+                        var openStalls = ev.Stalls.Count(s => s.Status == StallStatus.Available);
+                        var image = string.IsNullOrWhiteSpace(ev.ImageUrl)
+                            ? "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=800&q=80"
+                            : ev.ImageUrl;
+                        var organizer = string.IsNullOrWhiteSpace(ev.Organizer?.BusinessName) ? ev.Organizer?.FullName : ev.Organizer.BusinessName;
+                        <article class="opportunity-card">
+                            <div class="opportunity-cover" style="background-image:url('@image')"><span>@openStalls stalls open</span></div>
+                            <div class="opportunity-body">
+                                <div class="opportunity-meta"><span>@ev.Category</span><span>@ev.StartsAt.ToString("MMM d, yyyy")</span></div>
+                                <h3>@ev.Name</h3>
+                                <p class="opportunity-host">Hosted by <strong>@organizer</strong></p>
+                                <dl>
+                                    <div><dt>Venue</dt><dd>@ev.Venue</dd></div>
+                                    <div><dt>From</dt><dd>Rs. @ev.PriceFrom.ToString("N0")</dd></div>
+                                    <div><dt>Expected visitors</dt><dd>@(ev.ExpectedFootfall?.ToString("N0") ?? "Not stated")</dd></div>
+                                    <div><dt>Apply by</dt><dd>@(ev.ApplicationDeadline?.ToString("MMM d, h:mm tt") ?? "While stalls last")</dd></div>
+                                </dl>
+                                <a class="bp small" asp-controller="Events" asp-action="Details" asp-route-id="@ev.Id">Review event and map</a>
+                            </div>
+                        </article>
+                    }
+                    @if (!Model.UpcomingEvents.Any())
+                    {
+                        <div class="empty-state"><strong>No open opportunities</strong><p>New organizer listings will appear when their application window is active.</p></div>
+                    }
+                </div>
+            </section>
+        </main>
+
+        <aside class="vendor-sidebar">
+            <section class="workspace-panel profile-readiness-card">
+                <span class="panel-eyebrow">Vendor profile</span>
+                <div class="profile-readiness-head">
+                    <img src="@(string.IsNullOrWhiteSpace(Model.Vendor?.ProfileImageUrl) ? "/images/avatar-placeholder.svg" : Model.Vendor.ProfileImageUrl)" alt="" />
+                    <div><h2>@vendorName</h2><p>@(string.IsNullOrWhiteSpace(Model.Vendor?.BusinessName) ? "Independent vendor" : Model.Vendor.BusinessName)</p></div>
+                </div>
+                @{ var profileItems = new[] { !string.IsNullOrWhiteSpace(Model.Vendor?.ProfileImageUrl), !string.IsNullOrWhiteSpace(Model.Vendor?.BusinessName), !string.IsNullOrWhiteSpace(Model.Vendor?.PhoneNumber), !string.IsNullOrWhiteSpace(Model.Vendor?.Bio) }; var profileScore = profileItems.Count(value => value) * 25; }
+                <div class="profile-score"><span>Profile completeness</span><strong>@profileScore%</strong></div>
+                <div class="progress-track"><span style="width:@profileScore%"></span></div>
+                <p>A complete business profile gives organizers useful context when they review your application.</p>
+                <a class="bo" asp-controller="Account" asp-action="Profile">Complete profile</a>
+            </section>
+
+            <section class="workspace-panel local-events-card">
+                <span class="panel-eyebrow">Near @(Model.Vendor?.City ?? "Kathmandu")</span>
+                <h2>Local opportunities</h2>
+                <div class="sidebar-event-list">
+                    @foreach (var ev in Model.NearEvents.Take(4))
+                    {
+                        <a asp-controller="Events" asp-action="Details" asp-route-id="@ev.Id"><span>@ev.StartsAt.ToString("MMM dd")</span><div><strong>@ev.Name</strong><small>@ev.Venue &middot; @ev.Stalls.Count(s => s.Status == StallStatus.Available) open</small></div></a>
+                    }
+                    @if (!Model.NearEvents.Any())
+                    {
+                        <p>No matching events near your saved city yet. Update your profile location for better results.</p>
+                    }
+                </div>
+            </section>
+
+            <section class="workspace-panel decision-guide">
+                <span class="panel-eyebrow">Before you apply</span>
+                <h2>Check the details that matter</h2>
+                <ul><li>Organizer identity and contact information</li><li>Expected audience and event facilities</li><li>Stall size, zone, map position, and full price</li><li>Deposit, vendor requirements, and cancellation terms</li></ul>
+            </section>
+        </aside>
+    </div>
+</section>

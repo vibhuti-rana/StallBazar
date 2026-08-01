@@ -1,0 +1,50 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+}
+
+<section class="auth-wrap auth-visual swap-auth auth-clean-page">
+    <div class="auth-photo-panel">
+        <img src="https://images.unsplash.com/photo-1531058020387-3be344556be6?auto=format&fit=crop&w=1200&q=80" alt="Busy event market stalls" />
+        <div>
+            <span>StallBazar</span>
+            <h2 class="serif">Book, approve, and manage stalls from one clean workspace.</h2>
+            <p>Vendor discovery, organizer approvals, and dashboard updates stay connected.</p>
+        </div>
+    </div>
+    <form class="auth-card" asp-action="Login" method="post">
+        <h1 class="serif">Welcome back</h1>
+        <p>Login with your verified Gmail account to manage bookings, events, and stall requests.</p>
+        @if (TempData["DevVerificationLink"] is string devLink)
+        {
+            <div class="helper-panel">
+                Verification link: <a href="@devLink">Verify this Gmail now</a>
+            </div>
+        }
+        @if (TempData["DevPasswordResetLink"] is string resetLink)
+        {
+            <div class="helper-panel">
+                Password reset link: <a href="@resetLink">Reset password now</a>
+            </div>
+        }
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+        <label asp-for="Email"></label>
+        <input class="form-control" asp-for="Email" />
+        <span asp-validation-for="Email" class="text-danger"></span>
+        <label asp-for="Password"></label>
+        <div class="password-field"><input class="form-control" asp-for="Password" type="password" data-password-input /><button type="button" data-password-toggle>Show</button></div>
+        <span asp-validation-for="Password" class="text-danger"></span>
+        <label class="check-row"><input asp-for="RememberMe" /> Remember me</label>
+        <button class="bp w-100" type="submit">Login</button>
+        <div class="auth-links">
+            <a asp-action="ForgotPassword">Forgot password?</a>
+            <a asp-action="ResendVerification">Resend verification</a>
+            <a asp-action="Register">Create an account</a>
+        </div>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

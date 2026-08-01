@@ -1,0 +1,162 @@
+@model EventDetailsViewModel
+@{
+    ViewData["Title"] = Model.Event.Name;
+    var now = DateTime.Now;
+    var applicationOpen = Model.Event.EndsAt > now && (!Model.Event.ApplicationDeadline.HasValue || Model.Event.ApplicationDeadline > now);
+    var availableStalls = Model.Event.Stalls.Count(s => s.Status == StallStatus.Available);
+    var bookedStalls = Model.Event.Stalls.Count(s => s.Status == StallStatus.Booked);
+    var organizerName = string.IsNullOrWhiteSpace(Model.Event.Organizer?.BusinessName) ? Model.Event.Organizer?.FullName : Model.Event.Organizer.BusinessName;
+    var eventCover = string.IsNullOrWhiteSpace(Model.Event.ImageUrl)
+        ? "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&w=1600&q=80"
+        : Model.Event.ImageUrl;
+    var mapIsPdf = Model.Event.MapImageUrl?.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) == true;
+}
+
+<section class="page-shell event-detail-page credible-event-page">
+    <div class="event-detail-topbar">
+        <a class="back-link" asp-action="Index"><span aria-hidden="true">&larr;</span> All events</a>
+        @if (Model.IsOrganizerOwner)
+        {
+            <div class="actions"><a class="bo" asp-action="Edit" asp-route-id="@Model.Event.Id">Edit listing</a><a class="bp" asp-controller="Stalls" asp-action="Create" asp-route-eventId="@Model.Event.Id">Generate stalls</a></div>
+        }
+    </div>
+
+    <div class="credible-event-hero" style="background-image:url('@eventCover')">
+        <div class="credible-event-overlay">
+            <div class="event-hero-tags"><span>@Model.Event.Category</span><span class="@(applicationOpen ? "open" : "closed")">@(applicationOpen ? "Applications open" : "Applications closed")</span></div>
+            <h1>@Model.Event.Name</h1>
+            <p>@Model.Event.Venue</p>
+            <div class="hero-event-facts">
+                <div><span>Date</span><strong>@Model.Event.StartsAt.ToString("ddd, MMM d, yyyy")</strong></div>
+                <div><span>Open stalls</span><strong>@availableStalls of @Model.Event.Stalls.Count</strong></div>
+                <div><span>Starting price</span><strong>Rs. @Model.Event.PriceFrom.ToString("N0")</strong></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="event-assurance-bar">
+        <div><span aria-hidden="true">01</span><strong>Organizer-managed listing</strong><small>Event and stall changes are restricted to the owner.</small></div>
+        <div><span aria-hidden="true">02</span><strong>50% deposit reference</strong><small>Payment is reviewed before a stall is approved.</small></div>
+        <div><span aria-hidden="true">03</span><strong>Protected allocation</strong><small>Approval checks prevent duplicate stall confirmation.</small></div>
+    </div>
+
+    <div class="public-event-layout">
+        <main class="public-event-main">
+            <section class="workspace-panel event-overview-panel">
+                <span class="panel-eyebrow">About the event</span>
+                <h2>What vendors should expect</h2>
+                <p class="event-long-copy">@Model.Event.Description</p>
+                <div class="event-audience-stats">
+                    <div><span>Expected visitors</span><strong>@(Model.Event.ExpectedFootfall?.ToString("N0") ?? "Not stated")</strong></div>
+                    <div><span>Total stalls</span><strong>@Model.Event.Stalls.Count</strong></div>
+                    <div><span>Confirmed stalls</span><strong>@bookedStalls</strong></div>
+                </div>
+            </section>
+
+            <section class="event-terms-grid">
+                <article class="workspace-panel"><span class="term-number">01</span><h2>Facilities included</h2><p>@(string.IsNullOrWhiteSpace(Model.Event.Facilities) ? "The organizer has not listed included facilities. Contact them before applying if electricity, Wi-Fi, furniture, parking, water, or loading access is essential." : Model.Event.Facilities)</p></article>
+                <article class="workspace-panel"><span class="term-number">02</span><h2>Vendor requirements</h2><p>@(string.IsNullOrWhiteSpace(Model.Event.VendorRequirements) ? "No additional vendor requirements have been published. Ask the organizer about permits, arrival time, equipment, product restrictions, and cleanup." : Model.Event.VendorRequirements)</p></article>
+                <article class="workspace-panel"><span class="term-number">03</span><h2>Cancellation policy</h2><p>@(string.IsNullOrWhiteSpace(Model.Event.CancellationPolicy) ? "A cancellation policy has not been published. Confirm deposit handling with the organizer before submitting payment details." : Model.Event.CancellationPolicy)</p></article>
+            </section>
+
+            <section class="layout-panel credible-layout-panel" id="stall-layout">
+                <div class="layout-head">
+                    <div><span class="panel-eyebrow">Venue plan</span><h2>Choose a stall with context</h2><p>@(string.IsNullOrWhiteSpace(Model.Event.MapHint) ? "Review the organizer's layout and each stall's zone, size, price, and current status." : Model.Event.MapHint)</p></div>
+                    <div class="legend"><span class="dot available"></span>Available <span class="dot pending"></span>Pending <span class="dot booked"></span>Booked <span class="dot unavailable"></span>Unavailable</div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(Model.Event.MapImageUrl) && mapIsPdf)
+                {
+                    <div class="map-file-panel">
+                        <div>
+                            <span>PDF layout uploaded</span>
+                            <strong>Open the organizer-provided stall layout</strong>
+                            <p>The layout file can include detailed entrances, aisle labels, facilities, and stall zones.</p>
+                        </div>
+                        <a class="bp small" href="@Model.Event.MapImageUrl" target="_blank" rel="noopener">Open PDF</a>
+                    </div>
+                }
+                else if (!string.IsNullOrWhiteSpace(Model.Event.MapImageUrl))
+                {
+                    <div class="map-photo" style="background-image:url('@Model.Event.MapImageUrl')"><span>Organizer-provided venue layout</span></div>
+                }
+                else
+                {
+                    <div class="map-missing-state"><span>Venue map not uploaded</span><p>Use the stall grid below and contact the organizer if exact placement is important to your setup.</p></div>
+                }
+
+                <div class="stall-grid">
+                    @foreach (var stall in Model.Event.Stalls)
+                    {
+                        <article class="stall-tile @stall.Status.ToString().ToLowerInvariant()" style="grid-column:@(stall.PositionX + 1);grid-row:@(stall.PositionY + 1)">
+                            <div class="stall-tile-head"><div><span>Stall</span><strong>@stall.Number</strong></div><span class="status @stall.Status.ToString().ToLowerInvariant()">@stall.Status</span></div>
+                            <h3>@(string.IsNullOrWhiteSpace(stall.Name) ? stall.Type : stall.Name)</h3>
+                            <dl><div><dt>Zone</dt><dd>@stall.Zone</dd></div><div><dt>Type</dt><dd>@stall.Type</dd></div><div><dt>Size</dt><dd>@(string.IsNullOrWhiteSpace(stall.Size) ? $"{stall.Length:0.##}m x {stall.Breadth:0.##}m" : stall.Size)</dd></div><div><dt>Category</dt><dd>@StallTiers.Normalize(stall.Tier)</dd></div></dl>
+                            <div class="stall-price"><span>Full price</span><strong>Rs. @stall.Price.ToString("N0")</strong><small>50% deposit: Rs. @((stall.Price / 2).ToString("N0"))</small></div>
+
+                            @if (Model.IsOrganizerOwner)
+                            {
+                                <a class="bo small" asp-controller="Stalls" asp-action="Edit" asp-route-id="@stall.Id">Edit stall</a>
+                            }
+                            else if (Model.IsVendor && stall.Status == StallStatus.Available && applicationOpen)
+                            {
+                                <details class="booking-request">
+                                    <summary>Request this stall</summary>
+                                    <form asp-controller="Bookings" asp-action="Create" method="post">
+                                        <input type="hidden" name="stallId" value="@stall.Id" />
+                                        <label for="vendorNote-@stall.Id">Message to organizer</label>
+                                        <textarea id="vendorNote-@stall.Id" name="vendorNote" maxlength="800" rows="3" placeholder="Describe your products and setup needs (optional)"></textarea>
+                                        <button type="submit">Send application</button>
+                                    </form>
+                                </details>
+                            }
+                            else if (User.Identity?.IsAuthenticated != true && stall.Status == StallStatus.Available && applicationOpen)
+                            {
+                                <a class="bo small" asp-controller="Account" asp-action="Login">Sign in to apply</a>
+                            }
+                        </article>
+                    }
+                    @if (!Model.Event.Stalls.Any())
+                    {
+                        <div class="empty-state"><strong>Stall inventory is not ready</strong><p>The organizer has not added bookable stalls yet.</p></div>
+                    }
+                </div>
+            </section>
+        </main>
+
+        <aside class="public-event-sidebar">
+            <section class="workspace-panel application-summary-card">
+                <span class="panel-eyebrow">Application summary</span>
+                <h2>@(applicationOpen ? "Applications are open" : "Applications are closed")</h2>
+                <dl>
+                    <div><dt>Event starts</dt><dd>@Model.Event.StartsAt.ToString("MMM d, yyyy h:mm tt")</dd></div>
+                    <div><dt>Event ends</dt><dd>@Model.Event.EndsAt.ToString("MMM d, yyyy h:mm tt")</dd></div>
+                    <div><dt>Apply by</dt><dd>@(Model.Event.ApplicationDeadline?.ToString("MMM d, yyyy h:mm tt") ?? "While stalls remain")</dd></div>
+                    <div><dt>Starting stall price</dt><dd>Rs. @Model.Event.PriceFrom.ToString("N0")</dd></div>
+                    <div><dt>Deposit before approval</dt><dd>50% of selected stall</dd></div>
+                </dl>
+                @if (applicationOpen && availableStalls > 0)
+                {
+                    <a class="bp" href="#stall-layout">Review available stalls</a>
+                }
+                else
+                {
+                    <span class="closed-application-note">No new stall applications can be submitted.</span>
+                }
+            </section>
+
+            <section class="workspace-panel organizer-identity-card">
+                <span class="panel-eyebrow">Event organizer</span>
+                <div class="organizer-identity-head"><img src="@(string.IsNullOrWhiteSpace(Model.Event.Organizer?.ProfileImageUrl) ? "/images/avatar-placeholder.svg" : Model.Event.Organizer.ProfileImageUrl)" alt="" /><div><h2>@organizerName</h2><p>@Model.Event.Organizer?.FullName</p></div></div>
+                @if (!string.IsNullOrWhiteSpace(Model.Event.Organizer?.Bio)) { <p>@Model.Event.Organizer.Bio</p> }
+                <div class="organizer-contact-list">
+                    <a href="mailto:@(Model.Event.ContactEmail ?? Model.Event.Organizer?.Email)"><span>Email</span><strong>@(Model.Event.ContactEmail ?? Model.Event.Organizer?.Email)</strong></a>
+                    @if (!string.IsNullOrWhiteSpace(Model.Event.ContactPhone ?? Model.Event.Organizer?.PhoneNumber)) { <a href="tel:@(Model.Event.ContactPhone ?? Model.Event.Organizer?.PhoneNumber)"><span>Phone</span><strong>@(Model.Event.ContactPhone ?? Model.Event.Organizer?.PhoneNumber)</strong></a> }
+                    @if (!string.IsNullOrWhiteSpace(Model.Event.Organizer?.City)) { <div><span>Based in</span><strong>@Model.Event.Organizer.City</strong></div> }
+                </div>
+            </section>
+
+            <section class="workspace-panel safety-note-card"><span class="panel-eyebrow">Before paying</span><h2>Keep a clear record</h2><p>Confirm the organizer's instructions, submit only the requested reference, and keep your transfer receipt. StallBazar records the reference and review state but does not process the money.</p></section>
+        </aside>
+    </div>
+</section>

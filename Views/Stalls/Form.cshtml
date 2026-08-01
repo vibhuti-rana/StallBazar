@@ -1,0 +1,124 @@
+@model StallFormViewModel
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Generate stalls" : "Edit stall";
+    var isCreate = Model.Id == 0;
+    var action = isCreate ? "Create" : "Edit";
+    var selectedDefinition = StallTiers.GetDefinition(Model.Tier);
+}
+
+<section class="page-shell stall-workflow-page" data-stall-builder>
+    <div class="stall-workflow-head">
+        <div>
+            <a class="back-link" asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId"><span aria-hidden="true">&larr;</span> Event listing</a>
+            <div class="sec-lbl">Stall inventory</div>
+            <h1>@(isCreate ? "Generate a ready-to-book stall batch" : "Update stall details")</h1>
+            <p>@(isCreate ? "Choose a category, count, and numbering pattern. Stall sizes are applied automatically so you can build the map faster." : "Adjust this stall without changing the rest of the event inventory.")</p>
+        </div>
+        <div class="draft-state"><span></span>@(isCreate ? "Batch setup" : $"Stall {Model.Number}")</div>
+    </div>
+
+    <form class="stall-workflow-form" asp-action="@action" method="post">
+        <input asp-for="Id" type="hidden" />
+        <input asp-for="EventId" type="hidden" />
+        <input asp-for="Size" type="hidden" data-size-output />
+        <input asp-for="Length" type="hidden" data-length-output />
+        <input asp-for="Breadth" type="hidden" data-breadth-output />
+        @if (!isCreate)
+        {
+            <input asp-for="Quantity" type="hidden" value="1" />
+            <input asp-for="NumberPrefix" type="hidden" value="" />
+            <input asp-for="StartingNumber" type="hidden" value="1" />
+        }
+
+        <main class="stall-workflow-fields">
+            <div asp-validation-summary="ModelOnly" class="validation-summary text-danger"></div>
+
+            @if (isCreate)
+            {
+                <section class="builder-section">
+                    <div class="builder-section-head"><span>01</span><div><h2>Numbering and quantity</h2><p>Generate many stalls in one step with predictable labels.</p></div></div>
+                    <div class="field-grid compact-grid">
+                        <div class="field"><label asp-for="Quantity"></label><input class="form-control" asp-for="Quantity" type="number" min="1" max="100" /><small class="field-help">Create up to 100 stalls at once.</small><span asp-validation-for="Quantity" class="text-danger"></span></div>
+                        <div class="field"><label asp-for="NumberPrefix"></label><input class="form-control" asp-for="NumberPrefix" maxlength="8" placeholder="A" /><small class="field-help">Examples: A, F, VIP, B2.</small><span asp-validation-for="NumberPrefix" class="text-danger"></span></div>
+                        <div class="field"><label asp-for="StartingNumber"></label><input class="form-control" asp-for="StartingNumber" type="number" min="1" max="999" /><small class="field-help">A + 1 becomes A01.</small><span asp-validation-for="StartingNumber" class="text-danger"></span></div>
+                    </div>
+                </section>
+            }
+            else
+            {
+                <section class="builder-section">
+                    <div class="builder-section-head"><span>01</span><div><h2>Stall identity</h2><p>Keep the public stall number clear and unique.</p></div></div>
+                    <div class="field-grid compact-grid">
+                        <div class="field"><label asp-for="Number"></label><input class="form-control" asp-for="Number" placeholder="A01" /><span asp-validation-for="Number" class="text-danger"></span></div>
+                        <div class="field"><label asp-for="Name"></label><input class="form-control" asp-for="Name" placeholder="Corner showcase" /><span asp-validation-for="Name" class="text-danger"></span></div>
+                    </div>
+                </section>
+            }
+
+            <section class="builder-section">
+                <div class="builder-section-head"><span>02</span><div><h2>Category and vendor fit</h2><p>The selected category sets the stall dimensions automatically.</p></div></div>
+                <div class="stall-category-grid">
+                    @foreach (var tier in StallTiers.All)
+                    {
+                        var definition = StallTiers.GetDefinition(tier);
+                        var tierId = $"tier-{tier.ToLowerInvariant()}";
+                        var isSelected = string.Equals(StallTiers.Normalize(Model.Tier), tier, StringComparison.OrdinalIgnoreCase);
+                        <label class="stall-category-card @(isSelected ? "selected" : "")" for="@tierId">
+                            <input id="@tierId" type="radio" name="Tier" value="@tier" checked="@isSelected" data-stall-category data-size="@definition.Size" data-length="@definition.Length" data-breadth="@definition.Breadth" data-price="@definition.DefaultPrice" data-description="@definition.Description" />
+                            <span>@definition.Name</span>
+                            <strong>@definition.Size</strong>
+                            <small>@definition.Description</small>
+                        </label>
+                    }
+                </div>
+                <span asp-validation-for="Tier" class="text-danger"></span>
+                <div class="derived-size-callout">
+                    <span>Derived size</span>
+                    <strong data-derived-size>@selectedDefinition.Size</strong>
+                    <small data-derived-description>@selectedDefinition.Description</small>
+                </div>
+
+                <div class="field-grid mt-3">
+                    @if (isCreate)
+                    {
+                        <div class="field full"><label asp-for="Name"></label><input class="form-control" asp-for="Name" placeholder="Optional base label, e.g. Front row" /><small class="field-help">For multiple stalls, the generated number is appended to this label.</small><span asp-validation-for="Name" class="text-danger"></span></div>
+                    }
+                    <div class="field"><label asp-for="Type"></label><select class="form-select" asp-for="Type" asp-items="@(new SelectList(StallCategories.All))"></select><span asp-validation-for="Type" class="text-danger"></span></div>
+                    <div class="field"><label asp-for="Zone"></label><input class="form-control" asp-for="Zone" placeholder="Front entrance, food court, stage side" /><span asp-validation-for="Zone" class="text-danger"></span></div>
+                    <div class="field"><label asp-for="Price"></label><div class="input-prefix"><span>Rs.</span><input class="form-control" asp-for="Price" min="1" data-price-input /></div><small class="field-help">The vendor sees the full price and 50% deposit amount.</small><span asp-validation-for="Price" class="text-danger"></span></div>
+                    <div class="field"><label asp-for="Status"></label><select class="form-select" asp-for="Status" asp-items="Html.GetEnumSelectList<StallStatus>()"></select></div>
+                </div>
+            </section>
+
+            <section class="builder-section">
+                <div class="builder-section-head"><span>03</span><div><h2>Layout placement</h2><p>Choose where the generated row begins. Additional stalls continue left to right, then onto the next row.</p></div></div>
+                <div class="field-grid compact-grid">
+                    <div class="field"><label asp-for="PositionX"></label><input class="form-control" asp-for="PositionX" type="number" min="0" max="100" /><span asp-validation-for="PositionX" class="text-danger"></span></div>
+                    <div class="field"><label asp-for="PositionY"></label><input class="form-control" asp-for="PositionY" type="number" min="0" max="100" /><span asp-validation-for="PositionY" class="text-danger"></span></div>
+                </div>
+            </section>
+
+            <div class="builder-action-bar">
+                <div><strong>@(isCreate ? "Generate inventory" : "Save stall changes")</strong><small>@(isCreate ? "Sizes are derived from category and numbers are checked for duplicates." : "Only this stall will be updated.")</small></div>
+                <div class="actions"><a class="bo" asp-controller="Events" asp-action="Details" asp-route-id="@Model.EventId">Cancel</a><button class="bp" type="submit">@(isCreate ? "Generate stalls" : "Save stall")</button></div>
+            </div>
+        </main>
+
+        <aside class="stall-workflow-preview">
+            <div class="preview-sticky">
+                <span class="panel-eyebrow">Generated preview</span>
+                <div class="stall-preview-card">
+                    <div><span>Category</span><strong data-preview-tier>@selectedDefinition.Name</strong></div>
+                    <div><span>Size</span><strong data-preview-size>@selectedDefinition.Size</strong></div>
+                    <div><span>Numbering</span><strong data-preview-number>@(isCreate ? $"{Model.NumberPrefix}{Model.StartingNumber:00}" : Model.Number)</strong></div>
+                    <div><span>Batch size</span><strong data-preview-quantity>@(isCreate ? Model.Quantity : 1)</strong></div>
+                </div>
+                <p class="preview-disclaimer">The event layout image or PDF lives on the event form. These placement values control the generated stall grid positions shown to vendors.</p>
+            </div>
+        </aside>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

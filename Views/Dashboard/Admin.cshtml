@@ -1,0 +1,74 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Admin dashboard";
+}
+
+<section class="page-shell swap-page dashboard-page admin-workspace">
+    <div class="image-swipe-banner dashboard-banner" data-carousel>
+        <div class="photo-slide active" style="background-image:url('https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="photo-slide" style="background-image:url('https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="photo-slide" style="background-image:url('https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1400&q=80')"></div>
+        <div class="banner-copy">
+            <span>Admin overview</span>
+            <h2 class="serif">Clean system visibility without clutter.</h2>
+        </div>
+    </div>
+    <div class="page-head">
+        <div>
+            <div class="sec-lbl">Admin</div>
+            <h1 class="serif">System overview</h1>
+            <p>Monitor users, events, stalls, bookings, payment states, and account verification from a responsive control page.</p>
+        </div>
+    </div>
+    <div class="metric-grid">
+        <a class="metric" href="#admin-users"><span>@Model.Users</span><small>Users</small></a>
+        <a class="metric" asp-controller="Events" asp-action="Index"><span>@Model.Events</span><small>Events</small></a>
+        <a class="metric" href="#admin-bookings"><span>@Model.Stalls</span><small>Stalls</small></a>
+        <a class="metric" href="#admin-bookings"><span>@Model.Bookings</span><small>Bookings</small></a>
+    </div>
+    <div class="panel" id="admin-bookings">
+        <h2>Recent bookings</h2>
+        <div class="table-responsive admin-table">
+            <table class="table align-middle">
+                <thead><tr><th>Event</th><th>Stall</th><th>Vendor</th><th>Status</th><th>Payment</th></tr></thead>
+                <tbody>
+                @foreach (var booking in Model.RecentBookings)
+                {
+                    <tr>
+                        <td>@booking.Event?.Name</td>
+                        <td>@booking.Stall?.Number</td>
+                        <td>@booking.Vendor?.FullName</td>
+                        <td><span class="status @booking.Status.ToString().ToLowerInvariant()">@booking.Status</span></td>
+                        <td>@booking.PaymentStatus</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="panel mt-3" id="admin-users">
+        <h2>User and organizer details</h2>
+        <div class="table-responsive admin-table">
+            <table class="table align-middle">
+                <thead><tr><th>User</th><th>Email</th><th>Business</th><th>City</th><th>Verified</th></tr></thead>
+                <tbody>
+                @foreach (var user in Model.RecentUsers)
+                {
+                    <tr>
+                        <td>
+                            <div class="user-cell">
+                                <img src="@(string.IsNullOrWhiteSpace(user.ProfileImageUrl) ? "/images/avatar-placeholder.svg" : user.ProfileImageUrl)" alt="@user.FullName profile photo" />
+                                <span>@user.FullName</span>
+                            </div>
+                        </td>
+                        <td>@user.Email</td>
+                        <td>@(user.BusinessName ?? "Not added")</td>
+                        <td>@(user.City ?? "Not added")</td>
+                        <td><span class="status @(user.EmailConfirmed ? "approved" : "pending")">@(user.EmailConfirmed ? "Yes" : "No")</span></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,108 @@
+@model NotificationIndexViewModel
+@{
+    ViewData["Title"] = "Notifications";
+    var today = DateTime.Today;
+    var yesterday = today.AddDays(-1);
+    var groups = Model.Notifications
+        .GroupBy(n => n.CreatedAt.ToLocalTime().Date)
+        .OrderByDescending(g => g.Key)
+        .ToList();
+}
+
+@functions {
+    private static string GroupTitle(DateTime groupDate, DateTime today, DateTime yesterday)
+    {
+        if (groupDate == today)
+        {
+            return "Today";
+        }
+
+        if (groupDate == yesterday)
+        {
+            return "Yesterday";
+        }
+
+        return groupDate.ToString("dddd, MMMM d, yyyy");
+    }
+
+    private static string NotificationTime(DateTime createdAt, DateTime today, DateTime yesterday)
+    {
+        var local = createdAt.ToLocalTime();
+        if (local.Date == today)
+        {
+            return local.ToString("h:mm tt");
+        }
+
+        if (local.Date == yesterday)
+        {
+            return $"Yesterday, {local:h:mm tt}";
+        }
+
+        return local.ToString("MMM d, yyyy h:mm tt");
+    }
+}
+
+<section class="page-shell notifications-page">
+    <div class="notifications-phone-shell">
+        <header class="notifications-header">
+            <div>
+                <a class="back-link" asp-controller="Dashboard" asp-action="Index"><span aria-hidden="true">&larr;</span> Dashboard</a>
+                <span class="panel-eyebrow">Notification center</span>
+                <h1>Updates</h1>
+                <p>@Model.VisibleCount of @Model.TotalCount notifications shown</p>
+            </div>
+            <span class="notification-count-bubble">@Model.TotalCount</span>
+        </header>
+
+        @if (!Model.Notifications.Any())
+        {
+            <div class="empty-state notification-empty">
+                <strong>No notifications yet</strong>
+                <p>Booking requests, approvals, rejections, payment reviews, and system messages will appear here.</p>
+                <div class="actions mt-2">
+                    <a class="bo small" asp-controller="Events" asp-action="Index">Browse events</a>
+                    <a class="bo small" asp-controller="Dashboard" asp-action="Index">Open dashboard</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="notification-feed">
+                @foreach (var group in groups)
+                {
+                    <section class="notification-day-group" aria-label="@GroupTitle(group.Key, today, yesterday)">
+                        <h2>@GroupTitle(group.Key, today, yesterday)</h2>
+                        <div class="notification-day-list">
+                            @foreach (var notification in group)
+                            {
+                                <article class="notification-feed-card">
+                                    <div class="notification-icon-dot" aria-hidden="true"></div>
+                                    <div class="notification-card-copy">
+                                        <div>
+                                            <h3>@notification.Title</h3>
+                                            <time datetime="@notification.CreatedAt.ToString("O")">@NotificationTime(notification.CreatedAt, today, yesterday)</time>
+                                        </div>
+                                        <p>@notification.Message</p>
+                                    </div>
+                                    @if (!string.IsNullOrWhiteSpace(notification.LinkUrl))
+                                    {
+                                        <a class="notification-open-link" href="@notification.LinkUrl" aria-label="Open @notification.Title">
+                                            <span aria-hidden="true">&rarr;</span>
+                                        </a>
+                                    }
+                                </article>
+                            }
+                        </div>
+                    </section>
+                }
+            </div>
+
+            @if (Model.HasMore)
+            {
+                <div class="load-more-row">
+                    <a class="bo" asp-action="Index" asp-route-page="@(Model.Page + 1)">Load more notifications</a>
+                </div>
+            }
+        }
+    </div>
+</section>
