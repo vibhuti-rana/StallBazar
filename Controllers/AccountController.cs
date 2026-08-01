@@ -13,13 +13,15 @@ public class AccountController : Controller
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IEmailSender _emailSender;
     private readonly IWebHostEnvironment _environment;
+    private readonly IConfiguration _configuration;
 
-    public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IEmailSender emailSender, IWebHostEnvironment environment)
+    public AccountController(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IEmailSender emailSender, IWebHostEnvironment environment, IConfiguration configuration)
     {
         _signInManager = signInManager;
         _userManager = userManager;
         _emailSender = emailSender;
         _environment = environment;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -51,7 +53,18 @@ public class AccountController : Controller
 
         if (result.IsNotAllowed)
         {
-            ModelState.AddModelError(string.Empty, "Confirm your email address before logging in.");
+            if (user is not null && !user.EmailConfirmed)
+            {
+                var confirmationLink = await SendVerificationEmailAsync(user);
+                if (ShouldShowAccountLink())
+                {
+                    TempData["DevVerificationLink"] = confirmationLink;
+                }
+            }
+
+            ModelState.AddModelError(string.Empty, EmailDeliveryConfigured()
+                ? "Confirm your email address before logging in. A fresh verification link has been sent."
+                : "Confirm your email address before logging in. Use the verification link shown on this page.");
             return View(model);
         }
 
@@ -88,8 +101,10 @@ public class AccountController : Controller
         {
             await _userManager.AddToRoleAsync(user, role);
             var confirmationLink = await SendVerificationEmailAsync(user);
-            TempData["Success"] = "Account created. Check your email verification link before logging in.";
-            if (_environment.IsDevelopment())
+            TempData["Success"] = EmailDeliveryConfigured()
+                ? "Account created. Check your email verification link before logging in."
+                : "Account created. Email delivery is not configured, so use the verification link shown below before logging in.";
+            if (ShouldShowAccountLink())
             {
                 TempData["DevVerificationLink"] = confirmationLink;
             }
@@ -129,10 +144,15 @@ public class AccountController : Controller
         if (user is not null && !user.EmailConfirmed)
         {
             var confirmationLink = await SendVerificationEmailAsync(user);
-            TempData["DevVerificationLink"] = confirmationLink;
+            if (ShouldShowAccountLink())
+            {
+                TempData["DevVerificationLink"] = confirmationLink;
+            }
         }
 
-        TempData["Success"] = "If that email is registered and unverified, a verification link has been sent.";
+        TempData["Success"] = EmailDeliveryConfigured()
+            ? "If that email is registered and unverified, a verification link has been sent."
+            : "If that email is registered and unverified, use the verification link shown below.";
         return RedirectToAction(nameof(Login));
     }
 
@@ -149,10 +169,15 @@ public class AccountController : Controller
         if (user is not null)
         {
             var resetLink = await SendPasswordResetEmailAsync(user);
-            TempData["DevPasswordResetLink"] = resetLink;
+            if (ShouldShowAccountLink())
+            {
+                TempData["DevPasswordResetLink"] = resetLink;
+            }
         }
 
-        TempData["Success"] = "If that email is registered, a password reset link has been sent.";
+        TempData["Success"] = EmailDeliveryConfigured()
+            ? "If that email is registered, a password reset link has been sent."
+            : "If that email is registered, use the password reset link shown below.";
         return RedirectToAction(nameof(Login));
     }
 
@@ -225,7 +250,10 @@ public class AccountController : Controller
         if (emailChanged)
         {
             var confirmationLink = await SendVerificationEmailAsync(user);
-            TempData["DevVerificationLink"] = confirmationLink;
+            if (ShouldShowAccountLink())
+            {
+                TempData["DevVerificationLink"] = confirmationLink;
+            }
         }
 
         TempData["Success"] = emailChanged
@@ -383,6 +411,18 @@ public class AccountController : Controller
         var resetLink = Url.Action(nameof(ResetPassword), "Account", new { userId = user.Id, token }, Request.Scheme)!;
         await _emailSender.SendEmailAsync(user.Email!, "Reset your StallBazar password", $"Reset your password: <a href=\"{resetLink}\">Set a new password</a>");
         return resetLink;
+    }
+
+    private bool ShouldShowAccountLink()
+    {
+        return _environment.IsDevelopment() || !EmailDeliveryConfigured();
+    }
+
+    private bool EmailDeliveryConfigured()
+    {
+        return !string.IsNullOrWhiteSpace(_configuration["Smtp:Host"]) &&
+            !string.IsNullOrWhiteSpace(_configuration["Smtp:Username"]) &&
+            !string.IsNullOrWhiteSpace(_configuration["Smtp:Password"]);
     }
 
     private async Task<string?> SaveImageAsync(IFormFile? file, string folder)
