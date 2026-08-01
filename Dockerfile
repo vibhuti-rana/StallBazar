@@ -12,6 +12,8 @@ WORKDIR /app
 
 ENV ASPNETCORE_ENVIRONMENT=Production
 
+RUN mkdir -p /data
+
 COPY --from=build /app/publish ./
 
 ENTRYPOINT ["dotnet", "StallBazar.dll"]

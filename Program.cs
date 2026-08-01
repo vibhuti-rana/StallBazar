@@ -29,7 +29,11 @@ if (builder.Environment.IsDevelopment())
 
 // Add services to the container.
 var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
-var useDevelopmentSqlServer = builder.Environment.IsDevelopment() && CanOpenSqlServer(defaultConnection);
+var useDevelopmentSqlServer = builder.Environment.IsDevelopment()
+    && HasUsableSqlServerConnection(defaultConnection)
+    && CanOpenSqlServer(defaultConnection);
+var useProductionSqlServer = !builder.Environment.IsDevelopment()
+    && HasUsableSqlServerConnection(defaultConnection);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
@@ -46,7 +50,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     }
     else
     {
-        options.UseSqlServer(defaultConnection);
+        if (useProductionSqlServer)
+        {
+            options.UseSqlServer(defaultConnection);
+        }
+        else
+        {
+            options.UseSqlite($"Data Source={GetSqliteDatabasePath(builder.Environment, builder.Configuration)}");
+        }
     }
 });
 
@@ -114,9 +125,43 @@ app.MapControllerRoute(
     .WithStaticAssets();
 app.Run();
 
-static bool CanOpenSqlServer(string? connectionString)
+static string GetSqliteDatabasePath(IHostEnvironment environment, IConfiguration configuration)
+{
+    var configuredPath = configuration["Sqlite:DatabasePath"];
+    var databasePath = !string.IsNullOrWhiteSpace(configuredPath)
+        ? configuredPath
+        : Path.Combine(environment.ContentRootPath, "stallbazar.db");
+
+    if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RAILWAY_ENVIRONMENT")) ||
+        !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RAILWAY_PROJECT_ID")))
+    {
+        databasePath = !string.IsNullOrWhiteSpace(configuredPath)
+            ? configuredPath
+            : "/data/stallbazar.db";
+    }
+
+    var directory = Path.GetDirectoryName(databasePath);
+    if (!string.IsNullOrWhiteSpace(directory))
+    {
+        Directory.CreateDirectory(directory);
+    }
+
+    return databasePath;
+}
+
+static bool HasUsableSqlServerConnection(string? connectionString)
 {
     if (string.IsNullOrWhiteSpace(connectionString))
+    {
+        return false;
+    }
+
+    return !connectionString.Contains("(localdb)", StringComparison.OrdinalIgnoreCase);
+}
+
+static bool CanOpenSqlServer(string? connectionString)
+{
+    if (!HasUsableSqlServerConnection(connectionString))
     {
         return false;
     }
