@@ -51,7 +51,7 @@ public class AccountController : Controller
 
         if (result.IsNotAllowed)
         {
-            ModelState.AddModelError(string.Empty, "Confirm your Gmail address before logging in.");
+            ModelState.AddModelError(string.Empty, "Confirm your email address before logging in.");
             return View(model);
         }
 
@@ -88,7 +88,7 @@ public class AccountController : Controller
         {
             await _userManager.AddToRoleAsync(user, role);
             var confirmationLink = await SendVerificationEmailAsync(user);
-            TempData["Success"] = "Account created. Check your Gmail verification link before logging in.";
+            TempData["Success"] = "Account created. Check your email verification link before logging in.";
             if (_environment.IsDevelopment())
             {
                 TempData["DevVerificationLink"] = confirmationLink;
@@ -132,7 +132,7 @@ public class AccountController : Controller
             TempData["DevVerificationLink"] = confirmationLink;
         }
 
-        TempData["Success"] = "If that Gmail is registered and unverified, a verification link has been sent.";
+        TempData["Success"] = "If that email is registered and unverified, a verification link has been sent.";
         return RedirectToAction(nameof(Login));
     }
 
@@ -152,7 +152,7 @@ public class AccountController : Controller
             TempData["DevPasswordResetLink"] = resetLink;
         }
 
-        TempData["Success"] = "If that Gmail is registered, a password reset link has been sent.";
+        TempData["Success"] = "If that email is registered, a password reset link has been sent.";
         return RedirectToAction(nameof(Login));
     }
 
@@ -229,7 +229,7 @@ public class AccountController : Controller
         }
 
         TempData["Success"] = emailChanged
-            ? "Profile updated. Verify your new Gmail before your next login."
+            ? "Profile updated. Verify your new email before your next login."
             : "Profile updated.";
         return RedirectToAction(nameof(Profile));
     }
@@ -272,7 +272,7 @@ public class AccountController : Controller
 
         var result = await _userManager.ConfirmEmailAsync(user, token);
         TempData[result.Succeeded ? "Success" : "Error"] = result.Succeeded
-            ? "Gmail verified. You can log in now."
+            ? "Email verified. You can log in now."
             : "Email verification failed. Please register again or request a new verification email.";
 
         return RedirectToAction(nameof(Login));
@@ -373,7 +373,7 @@ public class AccountController : Controller
     {
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
         var confirmationLink = Url.Action(nameof(ConfirmEmail), "Account", new { userId = user.Id, token }, Request.Scheme)!;
-        await _emailSender.SendEmailAsync(user.Email!, "Confirm your StallBazar Gmail", $"Confirm your account: <a href=\"{confirmationLink}\">Verify Gmail</a>");
+        await _emailSender.SendEmailAsync(user.Email!, "Confirm your StallBazar email", $"Confirm your account: <a href=\"{confirmationLink}\">Verify email</a>");
         return confirmationLink;
     }
 

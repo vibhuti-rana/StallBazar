@@ -14,11 +14,11 @@
     </div>
     <form class="auth-card" asp-action="Login" method="post">
         <h1 class="serif">Welcome back</h1>
-        <p>Login with your verified Gmail account to manage bookings, events, and stall requests.</p>
+        <p>Login with your verified email account to manage bookings, events, and stall requests.</p>
         @if (TempData["DevVerificationLink"] is string devLink)
         {
             <div class="helper-panel">
-                Verification link: <a href="@devLink">Verify this Gmail now</a>
+                Verification link: <a href="@devLink">Verify this email now</a>
             </div>
         }
         @if (TempData["DevPasswordResetLink"] is string resetLink)

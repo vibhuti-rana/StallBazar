@@ -5,7 +5,7 @@ namespace StallBazar.Models;
 
 public class LoginViewModel
 {
-    [Required, EmailAddress, GmailAddress]
+    [Required, EmailAddress]
     [Display(Name = "Email address")]
     public string Email { get; set; } = string.Empty;
 
@@ -21,7 +21,7 @@ public class RegisterViewModel
     [Display(Name = "Full name")]
     public string FullName { get; set; } = string.Empty;
 
-    [Required, EmailAddress, GmailAddress]
+    [Required, EmailAddress]
     [Display(Name = "Email address")]
     public string Email { get; set; } = string.Empty;
 
@@ -38,14 +38,14 @@ public class RegisterViewModel
 
 public class ResendVerificationViewModel
 {
-    [Required, EmailAddress, GmailAddress]
-    [Display(Name = "Gmail address")]
+    [Required, EmailAddress]
+    [Display(Name = "Email address")]
     public string Email { get; set; } = string.Empty;
 }
 
 public class ForgotPasswordViewModel
 {
-    [Required, EmailAddress, GmailAddress]
+    [Required, EmailAddress]
     [Display(Name = "Registered email address")]
     public string Email { get; set; } = string.Empty;
 }
@@ -73,7 +73,7 @@ public class ProfileSettingsViewModel
     [Display(Name = "Full name")]
     public string FullName { get; set; } = string.Empty;
 
-    [Required, EmailAddress, GmailAddress]
+    [Required, EmailAddress]
     [Display(Name = "Email address")]
     public string Email { get; set; } = string.Empty;
 
@@ -111,22 +111,4 @@ public class ChangePasswordViewModel
     [Required, DataType(DataType.Password), Compare(nameof(NewPassword))]
     [Display(Name = "Confirm new password")]
     public string ConfirmPassword { get; set; } = string.Empty;
-}
-
-public sealed class GmailAddressAttribute : ValidationAttribute
-{
-    public GmailAddressAttribute()
-    {
-        ErrorMessage = "Use a Gmail address ending with @gmail.com. The account must also be verified by email.";
-    }
-
-    public override bool IsValid(object? value)
-    {
-        if (value is not string email || string.IsNullOrWhiteSpace(email))
-        {
-            return true;
-        }
-
-        return email.Trim().EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase);
-    }
 }

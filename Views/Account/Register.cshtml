@@ -14,13 +14,13 @@
     </div>
     <form class="auth-card" asp-action="Register" method="post">
         <h1 class="serif">Create account</h1>
-        <p>Choose the role that matches how you will use StallBazar. Only verified Gmail accounts can sign in.</p>
+        <p>Choose the role that matches how you will use StallBazar. Only verified email accounts can sign in.</p>
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <label asp-for="FullName"></label>
         <input class="form-control" asp-for="FullName" />
         <span asp-validation-for="FullName" class="text-danger"></span>
         <label asp-for="Email"></label>
-        <input class="form-control" asp-for="Email" placeholder="name@gmail.com" />
+        <input class="form-control" asp-for="Email" placeholder="name@example.com" />
         <span asp-validation-for="Email" class="text-danger"></span>
         <label asp-for="Password"></label>
         <div class="password-field"><input class="form-control" asp-for="Password" type="password" data-password-input /><button type="button" data-password-toggle>Show</button></div>
